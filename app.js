@@ -1,9 +1,13 @@
 /* Tilt & Tell — game logic. Made by Third Heaven Studios.
-   No network calls, no tracking. Everything is stored on the device. */
+   No tracking. Everything is stored on the device. The only network call is the
+   update check, which reads the public version.json. */
 (function () {
   "use strict";
 
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
+  // Present only inside the Android app (see android/…/MainActivity.java)
+  const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
+  const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
@@ -185,7 +189,11 @@
     return { ensure, play, startMusic, stopMusic, applyVolumes, get musicOn() { return musicOn; } };
   })();
 
-  function buzz(pattern) { if (settings.haptics && navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} } }
+  function buzz(pattern) {
+    if (!settings.haptics) return;
+    if (APP) { try { APP.vibrate([].concat(pattern)[0] || 20); } catch (e) {} return; }
+    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+  }
 
   /* ---------------- Screens / navigation ---------------- */
   const history = [];
@@ -684,6 +692,7 @@
 
   /* ---------------- Voice ---------------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const NATIVE_SR = !!(APP && (() => { try { return APP.speechAvailable(); } catch (e) { return false; } })());
   const Voice = (() => {
     let rec = null, want = false, windowText = "", cooldownUntil = 0, failed = false;
     const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
@@ -699,33 +708,47 @@
       return words.every(w => heard.includes(" " + w + " ") || heard.includes(" " + w + "s ") || (w.endsWith("s") && heard.includes(" " + w.slice(0, -1) + " ")));
     }
     function onResult(e) {
-      if (!turn.running || turn.paused || turn.lock) return;
-      if (performance.now() < cooldownUntil) return;
       let latest = "";
       for (let i = e.resultIndex; i < e.results.length; i++) latest += " " + e.results[i][0].transcript;
-      latest = norm(latest); if (!latest) return;
+      heard(latest);
+    }
+    function heard(raw) {
+      if (!turn.running || turn.paused || turn.lock) return;
+      if (performance.now() < cooldownUntil) return;
+      const latest = norm(raw); if (!latest) return;
       windowText = (windowText + " " + latest).slice(-160);
       if (answerHeard(latest)) { fire("got", "voice-answer"); return; }
       if (GOT.test(latest)) { fire("got", "voice"); return; }
       if (PASS.test(latest)) { fire("pass", "voice"); return; }
     }
     function fire(o, src) { cooldownUntil = performance.now() + 600; windowText = ""; score(o, src); }
+    function denied() { failed = true; want = false; toast("Voice is off. Microphone access wasn't allowed."); $("#hud-mic").hidden = true; }
+    // Android app: results come from the phone's own speech recognizer
+    window.__ttSpeech = (text) => { if (want) heard(String(text || "")); };
+    window.__ttSpeechError = (code) => { if (code === "not-allowed") denied(); };
     function create() {
       const r = new SR(); r.continuous = true; r.interimResults = true; r.lang = navigator.language || "en-US"; r.maxAlternatives = 1;
       r.onresult = onResult;
-      r.onerror = ev => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") { failed = true; want = false; toast("Voice is off. Microphone access wasn't allowed."); $("#hud-mic").hidden = true; } };
+      r.onerror = ev => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") denied(); };
       r.onend = () => { if (want && !failed) { try { r.start(); } catch (e) {} } else $("#hud-mic").hidden = true; };
       return r;
     }
     return {
-      supported: !!SR,
+      supported: NATIVE_SR || !!SR,
       start() {
-        if (!SR || !settings.ctlVoice || failed) return;
+        if (!settings.ctlVoice || failed) return;
+        if (NATIVE_SR) { want = true; try { APP.startListening(); } catch (e) {} $("#hud-mic").hidden = false; return; }
+        if (!SR) return;
         want = true; if (!rec) rec = create();
         try { rec.start(); } catch (e) { /* already running */ }
         $("#hud-mic").hidden = false;
       },
-      stop() { want = false; if (rec) { try { rec.stop(); } catch (e) {} } $("#hud-mic").hidden = true; },
+      stop() {
+        want = false;
+        if (NATIVE_SR) { try { APP.stopListening(); } catch (e) {} }
+        if (rec) { try { rec.stop(); } catch (e) {} }
+        $("#hud-mic").hidden = true;
+      },
       resetWindow() { windowText = ""; cooldownUntil = Math.max(cooldownUntil, performance.now() + 500); }
     };
   })();
@@ -931,32 +954,101 @@
   $("#copy-year").textContent = String(new Date().getFullYear());
 
   /* Android back button / browser back: keep people inside the game */
-  try {
-    window.history.pushState({ tt: 1 }, "");
-    window.addEventListener("popstate", () => {
+  function handleBack() {
+    if (!$("#modal").hidden) { closeModal(); if (current === "play" && turn.paused) resumeTurn(); return true; }
+    if (current === "play") { pauseTurn(); return true; }
+    if (["ready", "board", "results"].includes(current)) { confirmQuit(); return true; }
+    if (current !== "home") { back(); return true; }
+    return false;
+  }
+  if (APP) {
+    // Android back button: return false on the home screen so the app can close
+    window.onAppBack = handleBack;
+    window.onAppPause = () => { if (current === "play" && turn.running && !turn.paused) pauseTurn(); };
+  } else {
+    try {
       window.history.pushState({ tt: 1 }, "");
-      if (!$("#modal").hidden) { closeModal(); if (current === "play" && turn.paused) resumeTurn(); return; }
-      if (current === "play") pauseTurn();
-      else if (["ready", "board", "results"].includes(current)) confirmQuit();
-      else if (current !== "home") back();
-    });
-  } catch (e) {}
+      window.addEventListener("popstate", () => { window.history.pushState({ tt: 1 }, ""); handleBack(); });
+    } catch (e) {}
+  }
 
-  /* Offline support + update check.
-     version.json is published next to the game by the release workflow. */
-  if ("serviceWorker" in navigator && location.protocol === "https:") {
+  /* ---------------- Updates ----------------
+     The release workflow publishes version.json to the public Tilt-and-Tell-Updates repo:
+     { "version": "1.2.0", "notes": "...", "apk": { "url": ".../TiltAndTell-1.2.0.apk", "sha256": "..." } }
+     Android app: "Update" downloads the signed APK and opens Android's installer.
+     Web: "Update" loads the new files and reloads the page. */
+  const Updates = (() => {
+    let swReg = null, busy = false;
+    const newer = (a, b) => {
+      const pa = String(a).split(".").map(n => parseInt(n, 10) || 0), pb = String(b).split(".").map(n => parseInt(n, 10) || 0);
+      for (let i = 0; i < 3; i++) { if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0); }
+      return false;
+    };
+    function setStatus(msg, state) {
+      const el = $("#update-status"); if (el) el.textContent = msg;
+      const row = $("#check-updates"); if (row) row.dataset.state = state || "";
+      const bar = $("#update-bar"); if (bar) bar.hidden = state !== "downloading";
+    }
+    window.onUpdateStatus = msg => setStatus(msg, busy ? "downloading" : "");
+    window.onUpdateProgress = p => { const f = $("#update-fill"); if (f) f.style.width = Math.round(Math.max(0, Math.min(1, p)) * 100) + "%"; };
+    window.onUpdateFailed = () => { busy = false; setStatus("The update didn't finish. Tap to try again.", "error"); };
+
+    async function fetchLatest() {
+      const url = (APP ? UPDATES_BASE : "") + "version.json";
+      const r = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const v = await r.json();
+      if (!v || typeof v.version !== "string") throw new Error("bad version.json");
+      return v;
+    }
+    function apply(v) {
+      if (APP) {
+        if (!v.apk || !v.apk.url) { setStatus("This update isn't ready for Android yet. Try again later.", "error"); return; }
+        busy = true; setStatus("Downloading the update...", "downloading"); window.onUpdateProgress(0);
+        try { APP.downloadAndInstall(String(v.apk.url), String(v.apk.sha256 || "")); }
+        catch (e) { busy = false; setStatus("The update didn't start. Tap to try again.", "error"); }
+        return;
+      }
+      setStatus("Updating...", "downloading");
+      const reload = () => location.reload();
+      if (swReg) {
+        navigator.serviceWorker.addEventListener("controllerchange", reload, { once: true });
+        swReg.update().catch(reload);
+        setTimeout(reload, 4000);
+      } else reload();
+    }
+    function offer(v) {
+      const notes = v.notes ? String(v.notes) : "A fresh version of Tilt & Tell.";
+      modal(`Version ${v.version} is ready`, notes, [
+        { label: "Update", kind: "btn-primary", fn: () => apply(v) },
+        { label: "Later", kind: "btn-ghost", fn: () => store.set("skipVersion", v.version) }
+      ]);
+    }
+    async function check(manual) {
+      if (busy) return;
+      if (manual) setStatus("Checking for updates...", "checking");
+      try {
+        const v = await fetchLatest();
+        if (newer(v.version, VERSION)) {
+          setStatus(`Version ${v.version} is ready. Tap to update.`, "available");
+          if (manual || (["home", "splash"].includes(current) && store.get("skipVersion", "") !== v.version)) offer(v);
+        } else setStatus(`You have the latest version (${VERSION}).`, "ok");
+      } catch (e) {
+        setStatus(manual ? "Couldn't check right now. Check your internet and tap to try again." : "Tap to check for updates.", manual ? "error" : "");
+      }
+    }
+    return { check, set reg(r) { swReg = r; } };
+  })();
+  $("#check-updates").addEventListener("click", () => { Audio.play("tap"); Updates.check(true); });
+
+  if (!APP && "serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").then(reg => {
-        fetch("version.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(v => {
-          if (v && typeof v.version === "string" && v.version !== VERSION) {
-            reg.update().catch(() => {});
-            toast("A new version is ready. Close and reopen the game to update.");
-          }
-        }).catch(() => {});
-      }).catch(() => {});
+      navigator.serviceWorker.register("sw.js").then(reg => { Updates.reg = reg; }).catch(() => {}).finally(() => setTimeout(() => Updates.check(false), 2500));
     });
+  } else if (APP) {
+    setTimeout(() => Updates.check(false), 2500);
   }
 
   // Expose a tiny hook for automated tests only (no secrets, read-only state)
-  window.__TT = { game, turn, settings, buildDeck, Tilt, score: (o) => score(o, "test") };
+  window.__TT = { game, turn, settings, buildDeck, Tilt, Updates, score: (o) => score(o, "test") };
 })();

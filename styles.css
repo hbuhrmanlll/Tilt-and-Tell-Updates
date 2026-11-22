@@ -373,3 +373,11 @@ input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius
 .cat-lock { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 2; color: var(--gold); }
 .cat-lock svg { width: 17px; height: 17px; }
 .cat-note { text-align: center; margin-top: 16px; }
+
+/* Updates row */
+.row-update > span { flex: 1; min-width: 0; }
+.row-update[data-state="available"] small { color: var(--gold, #f5c451); }
+.row-update[data-state="error"] small { color: var(--coral, #ff6a55); }
+.row-update[data-state="ok"] small { color: var(--mint, #2fd18b); }
+.update-bar { display: block; height: 6px; margin-top: 8px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+.update-fill { display: block; height: 100%; width: 0; background: var(--gold, #f5c451); transition: width .15s linear; }

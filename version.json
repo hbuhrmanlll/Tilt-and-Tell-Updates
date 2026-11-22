@@ -1,1 +1,8 @@
-{ "version": "1.1.0", "notes": "One word per card, unlockable decks with stars, and faster Pass and Got it." }
+{
+  "version": "1.2.0",
+  "notes": "Tilt & Tell is now an Android app, with an Update button in Settings. Voice uses your phone's own speech engine.",
+  "apk": {
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.2.0/TiltAndTell-1.2.0.apk",
+    "sha256": "ea6d3fe6e3831848cb7343aa87ba0817b31d6d77cdd3ccd5c46313808316a225"
+  }
+}

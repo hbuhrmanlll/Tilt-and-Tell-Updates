@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tilt &amp; Tell">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://hbuhrmanlll.github.io; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -289,6 +289,10 @@
         <label class="row"><span><strong>One word per card</strong><small>Turn off to also get longer cards like “Statue of Liberty”</small></span><input type="checkbox" class="switch" data-set="oneWord"></label>
         <button class="row row-btn" id="unlock-all"><span><strong>Unlock all decks</strong><small>For leaders running a big game night</small></span></button>
         <button class="row row-btn" id="reset-history"><span><strong>Reset word history</strong><small>The game avoids repeats until every word in a category has shown up. This starts it over.</small></span></button>
+      </div>
+      <h3 class="sub">Updates</h3>
+      <div class="list">
+        <button class="row row-btn row-update" id="check-updates"><span><strong>Check for updates</strong><small id="update-status" aria-live="polite">Tap to see if there's a new version.</small><span class="update-bar" id="update-bar" hidden><span class="update-fill" id="update-fill"></span></span></span></button>
       </div>
       <div class="list">
         <button class="row row-btn" data-nav="about"><span><strong>About Tilt &amp; Tell</strong></span></button>
