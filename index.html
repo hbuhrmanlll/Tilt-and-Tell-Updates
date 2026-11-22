@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Tilt &amp; Tell</title>
+<meta name="description" content="A party guessing game. Hold the phone to your forehead, your friends give clues, tilt to score.">
+<meta name="theme-color" content="#0b1026">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tilt &amp; Tell">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Splash: studio placeholder -->
+  <section class="screen screen-splash is-active" id="screen-splash" aria-label="Third Heaven Studios">
+    <button class="splash-hit" id="splash-skip" aria-label="Skip intro">
+      <!-- LOGO PLACEHOLDER: replace this block with the official Third Heaven Studios logo file. -->
+      <div class="studio-logo-placeholder" data-placeholder="studio-logo">
+        <span class="studio-ph-tag">Logo goes here</span>
+        <span class="studio-ph-name">Third Heaven Studios</span>
+      </div>
+      <span class="splash-presents">presents</span>
+    </button>
+  </section>
+
+  <!-- Home -->
+  <section class="screen screen-home" id="screen-home" aria-labelledby="home-title">
+    <div class="home-top">
+      <button class="icon-btn" data-nav="settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
+    </div>
+    <div class="home-hero">
+      <div class="hero-cards" aria-hidden="true">
+        <div class="hero-card hero-card-back"></div>
+        <div class="hero-card hero-card-mid"></div>
+        <div class="hero-card hero-card-front"><span id="hero-word">Penguin</span></div>
+      </div>
+      <h1 class="wordmark" id="home-title"><span class="wm-1">Tilt</span><span class="wm-amp">&amp;</span><span class="wm-2">Tell</span></h1>
+      <p class="home-tag">Phone on your forehead. Friends give clues. Tilt down when you get it.</p>
+    </div>
+    <div class="home-actions">
+      <button class="btn btn-primary btn-xl" data-nav="setup">Start a game</button>
+      <div class="home-row">
+        <button class="btn btn-ghost" data-nav="howto">How to play</button>
+        <button class="btn btn-ghost" data-nav="decks">My decks</button>
+      </div>
+    </div>
+    <footer class="home-foot">
+      <button class="linkish" data-nav="about">Made by Third Heaven Studios</button>
+    </footer>
+  </section>
+
+  <!-- How to play -->
+  <section class="screen screen-howto" id="screen-howto" aria-labelledby="howto-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="howto-title">How to play</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <ol class="steps">
+        <li><strong>Pick who's playing.</strong> Everyone for themselves, teams, or a quick round with no scores.</li>
+        <li><strong>Choose categories.</strong> Mix as many as you want. Words come in a fresh random order every time.</li>
+        <li><strong>Hold the phone on your forehead</strong>, screen facing your friends. Don't peek!</li>
+        <li><strong>Friends give clues.</strong> They can describe, act, sing, or do impressions. They just can't say the word.</li>
+        <li><strong>Guess as many as you can</strong> before time runs out.</li>
+      </ol>
+      <h3 class="sub">Ways to score</h3>
+      <div class="control-grid">
+        <div class="control-card good"><span class="cc-ico" aria-hidden="true">⤓</span><strong>Tilt down</strong><span>Got it</span></div>
+        <div class="control-card bad"><span class="cc-ico" aria-hidden="true">⤒</span><strong>Tilt up</strong><span>Pass</span></div>
+        <div class="control-card good"><span class="cc-ico" aria-hidden="true">↕</span><strong>Swipe up or down</strong><span>Got it</span></div>
+        <div class="control-card bad"><span class="cc-ico" aria-hidden="true">↔</span><strong>Swipe left or right</strong><span>Pass</span></div>
+        <div class="control-card good"><span class="cc-ico" aria-hidden="true">🎤</span><strong>Say “Got it”</strong><span>or say the answer</span></div>
+        <div class="control-card bad"><span class="cc-ico" aria-hidden="true">🎤</span><strong>Say “Pass”</strong><span>or “Skip”</span></div>
+      </div>
+      <h3 class="sub">Unlock more decks</h3>
+      <p class="fine">Some decks start locked. You earn a ⭐ star for every word you get right. Spend stars on the category screen to open new decks.</p>
+      <p class="fine">Voice works on most phones but depends on your browser. Turn it on in Settings. On iPhone, tap Allow when asked about motion so tilting works.</p>
+      <p class="fine">After each turn you can tap any word to fix the score, in case a tilt or a voice command got it wrong.</p>
+    </div>
+  </section>
+
+  <!-- Setup -->
+  <section class="screen screen-setup" id="screen-setup" aria-labelledby="setup-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="setup-title">Who's playing?</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <div class="seg" role="radiogroup" aria-label="Game mode" id="mode-seg">
+        <button role="radio" data-mode="players" aria-checked="true">Each player</button>
+        <button role="radio" data-mode="teams" aria-checked="false">Teams</button>
+        <button role="radio" data-mode="quick" aria-checked="false">Just play</button>
+      </div>
+      <p class="mode-note" id="mode-note"></p>
+
+      <div id="roster-wrap">
+        <ul class="roster" id="roster" aria-label="Players"></ul>
+        <button class="btn btn-ghost btn-add" id="add-roster">+ Add player</button>
+      </div>
+
+      <h3 class="sub">Turn length</h3>
+      <div class="chips" role="radiogroup" aria-label="Turn length" id="time-chips">
+        <button role="radio" data-time="30">30s</button>
+        <button role="radio" data-time="60">60s</button>
+        <button role="radio" data-time="90">90s</button>
+        <button role="radio" data-time="120">2 min</button>
+      </div>
+
+      <div id="rounds-wrap">
+        <h3 class="sub">Turns each</h3>
+        <div class="chips" role="radiogroup" aria-label="Turns each" id="round-chips">
+          <button role="radio" data-rounds="1">1</button>
+          <button role="radio" data-rounds="2">2</button>
+          <button role="radio" data-rounds="3">3</button>
+          <button role="radio" data-rounds="5">5</button>
+        </div>
+      </div>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="to-categories">Choose categories</button>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="screen screen-cats" id="screen-cats" aria-labelledby="cats-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="cats-title">Pick categories</h2>
+      <button class="bar-link" id="cats-surprise">Surprise me</button>
+    </header>
+    <div class="cats-search">
+      <p class="star-row"><span class="star-pill" aria-label="Your stars">⭐ <span id="star-count">0</span></span><span class="star-hint" id="star-hint"></span></p>
+      <input type="search" id="cat-search" placeholder="Search categories" autocomplete="off" aria-label="Search categories" maxlength="40">
+    </div>
+    <div class="scroll" id="cat-scroll">
+      <div id="cat-list"></div>
+      <p class="empty" id="cat-empty" hidden>No categories match that. Try a shorter word.</p>
+      <p class="fine cat-note" id="cat-oneword-note" hidden>Two phrase decks are hidden because cards are set to one word. Turn off “One word per card” in Settings to see them.</p>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="cats-go" disabled>Pick at least one</button>
+    </div>
+  </section>
+
+  <!-- Turn intro / ready -->
+  <section class="screen screen-ready" id="screen-ready" aria-labelledby="ready-name">
+    <header class="bar bar-clear">
+      <button class="icon-btn" id="ready-quit" aria-label="Quit game"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      <span class="ready-meta" id="ready-meta"></span>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="ready-body">
+      <p class="ready-kicker" id="ready-kicker">Up next</p>
+      <h2 class="ready-name" id="ready-name">Player 1</h2>
+      <p class="ready-cats" id="ready-cats"></p>
+      <div class="forehead-demo" aria-hidden="true">
+        <div class="fd-head"></div>
+        <div class="fd-phone"><span>?</span></div>
+      </div>
+      <p class="ready-tip" id="ready-tip">Hold the phone sideways on your forehead, screen facing out.</p>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="ready-go">I'm ready</button>
+    </div>
+  </section>
+
+  <!-- Play -->
+  <section class="screen screen-play" id="screen-play" aria-label="Playing">
+    <div class="play-stage" id="play-stage">
+      <div class="play-hud">
+        <button class="hud-btn" id="play-pause" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+        <div class="hud-cat" id="play-cat"></div>
+        <div class="hud-right">
+          <span class="hud-mic" id="hud-mic" hidden aria-label="Listening">🎤</span>
+          <span class="hud-score" id="play-score" aria-label="Score">0</span>
+          <div class="hud-timer" id="play-timer" role="timer" aria-live="off"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t-track" cx="22" cy="22" r="19"/><circle class="t-fill" id="timer-ring" cx="22" cy="22" r="19"/></svg><span id="timer-num">60</span></div>
+        </div>
+      </div>
+      <div class="play-word-wrap"><div class="play-word" id="play-word" aria-live="polite"></div></div>
+      <div class="play-buttons" id="play-buttons">
+        <button class="pbtn pbtn-pass" id="btn-pass">Pass</button>
+        <button class="pbtn pbtn-got" id="btn-got">Got it</button>
+      </div>
+      <div class="play-overlay" id="play-overlay" aria-hidden="true">
+        <div class="po-big" id="po-big"></div>
+        <div class="po-small" id="po-small"></div>
+      </div>
+      <div class="play-wait" id="play-wait">
+        <div class="pw-inner">
+          <div class="pw-count" id="pw-count"></div>
+          <div class="pw-msg" id="pw-msg">Put the phone on your forehead</div>
+          <button class="btn btn-light" id="pw-start">Start now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Turn results -->
+  <section class="screen screen-results" id="screen-results" aria-labelledby="res-title">
+    <div class="res-head">
+      <p class="res-kicker" id="res-kicker">Time's up</p>
+      <h2 class="res-title" id="res-title"><span id="res-score">0</span> <span class="res-unit" id="res-unit">correct</span></h2>
+      <p class="res-hint">Tap a word to fix it.</p>
+    </div>
+    <div class="scroll">
+      <ul class="res-list" id="res-list"></ul>
+      <p class="empty" id="res-empty" hidden>No words this turn. Ready for another try?</p>
+    </div>
+    <div class="dock dock-two" id="res-dock">
+      <button class="btn btn-primary btn-xl" id="res-next">Save and continue</button>
+    </div>
+  </section>
+
+  <!-- Scoreboard -->
+  <section class="screen screen-board" id="screen-board" aria-labelledby="board-title">
+    <header class="bar bar-clear">
+      <button class="icon-btn" id="board-quit" aria-label="Quit game"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      <h2 id="board-title">Scores</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <p class="board-progress" id="board-progress"></p>
+      <ol class="board" id="board-list"></ol>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="board-next">Next turn</button>
+      <button class="btn btn-ghost" id="board-end">End game now</button>
+    </div>
+  </section>
+
+  <!-- Winner -->
+  <section class="screen screen-win" id="screen-win" aria-labelledby="win-title">
+    <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+    <div class="win-body">
+      <p class="win-kicker">And the winner is</p>
+      <h2 class="win-title" id="win-title">Player</h2>
+      <p class="win-score" id="win-score"></p>
+      <ol class="board board-final" id="win-list"></ol>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="win-again">Play again</button>
+      <button class="btn btn-ghost" id="win-home">Back to home</button>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section class="screen screen-settings" id="screen-settings" aria-labelledby="settings-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="settings-title">Settings</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <h3 class="sub">Controls</h3>
+      <div class="list">
+        <label class="row"><span><strong>Tilt</strong><small>Tilt down for got it, up to pass</small></span><input type="checkbox" class="switch" data-set="ctlTilt"></label>
+        <label class="row"><span><strong>Swipe</strong><small>Up or down got it, left or right pass</small></span><input type="checkbox" class="switch" data-set="ctlSwipe"></label>
+        <label class="row"><span><strong>On-screen buttons</strong><small>Big Pass and Got it buttons</small></span><input type="checkbox" class="switch" data-set="ctlButtons"></label>
+        <label class="row"><span><strong>Voice</strong><small id="voice-support">Say “got it” or “pass”</small></span><input type="checkbox" class="switch" data-set="ctlVoice"></label>
+        <label class="row"><span><strong>Say the answer to score</strong><small>Counts it when the mic hears the word</small></span><input type="checkbox" class="switch" data-set="voiceAnswer"></label>
+        <label class="row"><span><strong>Flip tilt directions</strong><small>Tilt up for got it, down to pass</small></span><input type="checkbox" class="switch" data-set="tiltFlip"></label>
+        <div class="row row-stack"><span><strong>Tilt sensitivity</strong></span>
+          <div class="chips chips-sm" role="radiogroup" aria-label="Tilt sensitivity" id="sens-chips">
+            <button role="radio" data-sens="low">Big tilt</button>
+            <button role="radio" data-sens="med">Normal</button>
+            <button role="radio" data-sens="high">Small tilt</button>
+          </div>
+        </div>
+      </div>
+      <h3 class="sub">Sound</h3>
+      <div class="list">
+        <label class="row"><span><strong>Mute everything</strong></span><input type="checkbox" class="switch" data-set="mute"></label>
+        <label class="row row-stack"><span><strong>Sound effects</strong></span><input type="range" min="0" max="100" step="5" data-set="sfxVol" aria-label="Sound effects volume"></label>
+        <label class="row row-stack"><span><strong>Music</strong><small>Plays on menus only, so it never covers your clues</small></span><input type="range" min="0" max="100" step="5" data-set="musicVol" aria-label="Music volume"></label>
+        <label class="row"><span><strong>Vibration</strong><small>On phones that support it</small></span><input type="checkbox" class="switch" data-set="haptics"></label>
+      </div>
+      <h3 class="sub">Words</h3>
+      <div class="list">
+        <label class="row"><span><strong>One word per card</strong><small>Turn off to also get longer cards like “Statue of Liberty”</small></span><input type="checkbox" class="switch" data-set="oneWord"></label>
+        <button class="row row-btn" id="unlock-all"><span><strong>Unlock all decks</strong><small>For leaders running a big game night</small></span></button>
+        <button class="row row-btn" id="reset-history"><span><strong>Reset word history</strong><small>The game avoids repeats until every word in a category has shown up. This starts it over.</small></span></button>
+      </div>
+      <div class="list">
+        <button class="row row-btn" data-nav="about"><span><strong>About Tilt &amp; Tell</strong></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- My decks -->
+  <section class="screen screen-decks" id="screen-decks" aria-labelledby="decks-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="decks-title">My decks</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <p class="fine">Make your own category, like your youth group leaders, inside jokes, or this week's lesson. Decks stay on this phone.</p>
+      <ul class="deck-list" id="deck-list"></ul>
+      <div class="empty-card" id="deck-empty">
+        <strong>No decks yet</strong>
+        <span>Your custom decks show up here and in the category list.</span>
+      </div>
+    </div>
+    <div class="dock">
+      <button class="btn btn-primary btn-xl" id="deck-new">Make a deck</button>
+    </div>
+  </section>
+
+  <!-- Deck editor -->
+  <section class="screen screen-deck-edit" id="screen-deck-edit" aria-labelledby="deck-edit-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="deck-edit-title">New deck</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll">
+      <label class="field"><span>Deck name</span><input type="text" id="deck-name" maxlength="40" placeholder="Youth leaders" autocomplete="off"></label>
+      <label class="field"><span>Words, one per line</span><textarea id="deck-items" rows="10" maxlength="8000" placeholder="Pastor Mike&#10;Camp Victory&#10;The church van"></textarea></label>
+      <p class="fine" id="deck-count">0 words</p>
+      <p class="form-error" id="deck-error" role="alert" hidden></p>
+    </div>
+    <div class="dock dock-two">
+      <button class="btn btn-danger" id="deck-delete" hidden>Delete</button>
+      <button class="btn btn-primary btn-xl" id="deck-save">Save deck</button>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="screen screen-about" id="screen-about" aria-labelledby="about-title">
+    <header class="bar">
+      <button class="icon-btn" data-back aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="about-title">About</h2>
+      <span class="bar-spacer"></span>
+    </header>
+    <div class="scroll about-body">
+      <!-- LOGO PLACEHOLDER: replace with the official Third Heaven Studios logo file. -->
+      <div class="studio-logo-placeholder small" data-placeholder="studio-logo">
+        <span class="studio-ph-tag">Logo goes here</span>
+        <span class="studio-ph-name">Third Heaven Studios</span>
+      </div>
+      <p class="about-made">Made by Third Heaven Studios</p>
+      <p class="about-ver">Tilt &amp; Tell, version <span id="app-version"></span></p>
+      <p class="fine">Tilt &amp; Tell collects no personal information. Names, scores, and custom decks stay on this device. If you turn on voice, your phone's built-in speech service may process audio to understand commands.</p>
+      <p class="fine">Category names describe general topics. Tilt &amp; Tell is not affiliated with or endorsed by any studio, publisher, or brand mentioned in the word lists.</p>
+      <p class="fine">Font: Bricolage Grotesque, SIL Open Font License 1.1. Sounds and music are made in code for this game.</p>
+      <p class="copy">© <span id="copy-year"></span> Third Heaven Studios</p>
+    </div>
+  </section>
+
+  <!-- Pause / confirm dialog -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title"></h3>
+      <p id="modal-text"></p>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="rotate-hint" id="rotate-hint" aria-hidden="true">Turn your phone sideways for bigger words</div>
+</div>
+<script src="categories.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
