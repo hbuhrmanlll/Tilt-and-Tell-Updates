@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.4.1";
+  const VERSION = "1.4.3";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -115,7 +115,10 @@
     function ensure() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
-      ctx = new AC(); master = ctx.createGain(); master.connect(ctx.destination);
+      ctx = new AC(); master = ctx.createGain();
+      // A gentle limiter keeps louder music and effects from crackling on phone speakers
+      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.knee.value = 10; comp.ratio.value = 6; comp.attack.value = 0.004; comp.release.value = 0.2;
+      master.connect(comp); comp.connect(ctx.destination);
       sfxBus = ctx.createGain(); sfxBus.connect(master);
       musicBus = ctx.createGain(); musicBus.connect(master);
       applyVolumes(); return true;
@@ -127,7 +130,7 @@
       musicBus.gain.value = musicLevel();
     }
     // Turn music is a bit quieter, and quieter still when voice is on so the phone can hear you
-    function musicLevel() { return (settings.musicVol / 100) * 0.32 * (mode === "turn" ? (settings.ctlVoice ? 0.45 : 0.8) : 1); }
+    function musicLevel() { return (settings.musicVol / 100) * 0.32 * (mode === "turn" ? (settings.ctlVoice ? 1.3 : 2.4) * [1, 1.35, 1.6][level] : 1); }
     function tone(freq, start, dur, { type = "sine", vol = 0.3, attack = 0.005, bus = sfxBus, slideTo = null, filter = null } = {}) {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = type; o.frequency.setValueAtTime(freq, start);
@@ -173,22 +176,31 @@
     const CHORDS = [[261.6, 329.6, 392.0], [220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [196.0, 246.9, 293.7]];
     const BASS = [130.8, 110.0, 87.3, 98.0];
     const MELODY = [784, 0, 659, 0, 587, 659, 0, 523, 659, 0, 523, 0, 440, 523, 0, 0, 698, 0, 659, 0, 587, 523, 0, 440, 587, 0, 494, 0, 523, 0, 0, 0];
-    const bpm = () => mode === "menu" ? 96 : [116, 138, 156][level];
-    const key = () => mode === "menu" ? 1 : [1, Math.pow(2, 2 / 12), Math.pow(2, 3 / 12)][level];
+    const bpm = () => mode === "menu" ? 96 : [112, 150, 176][level];
+    const key = () => mode === "menu" ? 1 : [1, Math.pow(2, 3 / 12), Math.pow(2, 5 / 12)][level];
+    // Rush arpeggio (replaces the relaxed tune in the last 10 seconds): fast up-and-down notes
+    const RUSH = [0, 4, 7, 12, 7, 4, 0, 7];
     function hat(t, vol) {
       const len = Math.floor(ctx.sampleRate * 0.03), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
       const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
       f.type = "highpass"; f.frequency.value = 6000; g.gain.value = vol; src.buffer = b; src.connect(f); f.connect(g); g.connect(musicBus); src.start(t);
     }
-    function kick(t, vol) { tone(140, t, 0.16, { type: "sine", vol, slideTo: 45, bus: musicBus }); }
+    function kick(t, vol) { tone(140, t, 0.16, { type: "sine", vol, slideTo: 45, bus: musicBus }); tone(900, t, 0.02, { type: "triangle", vol: vol * 0.35, slideTo: 300, bus: musicBus }); }
     function schedule() {
       while (nextBeat < ctx.currentTime + 0.25) {
         const STEP = 60 / bpm() / 2, k = key(); // eighth notes
         const bar = Math.floor(beatIdx / 8) % 4, step = beatIdx % 8, t = nextBeat;
         if (step === 0 || step === 4) CHORDS[bar].forEach(f => tone(f * k, t, STEP * 3.6, { type: "triangle", vol: 0.05, attack: 0.03, bus: musicBus, filter: 1500 }));
         if (step % 2 === 0) tone(BASS[bar] * k, t, STEP * 1.6, { type: "sine", vol: 0.2, bus: musicBus });
-        const m = MELODY[beatIdx % 32]; if (m) tone(m * k, t, STEP * 0.9, { type: "sine", vol: 0.06, bus: musicBus });
+        if (mode === "turn" && step % 2 === 0) tone(BASS[bar] * k * 2, t, STEP * 1.4, { type: "triangle", vol: 0.12, bus: musicBus, filter: 1200 });
+        if (mode === "turn" && level > 0) {
+          // two fast arpeggio notes per beat step, like an alarm-y "hurry up" riff
+          const root = CHORDS[bar][0] * 2 * k;
+          [0, 1].forEach(h => tone(root * Math.pow(2, RUSH[(beatIdx * 2 + h) % 8] / 12), t + h * STEP / 2, STEP * 0.42, { type: "square", vol: level === 2 ? 0.07 : 0.055, bus: musicBus, filter: 3200 }));
+        } else {
+          const m = MELODY[beatIdx % 32]; if (m) tone(m * k, t, STEP * 0.9, { type: mode === "turn" ? "triangle" : "sine", vol: mode === "turn" ? 0.09 : 0.06, bus: musicBus });
+        }
         if (mode === "menu") { if (step % 2 === 1) hat(t, 0.05); }
         else {
           if (step === 0 || step === 4 || (level > 0 && step % 2 === 0)) kick(t, level ? 0.3 : 0.22);
@@ -218,7 +230,24 @@
       musicOn = true; nextBeat = ctx.currentTime + 0.1; beatIdx = 0;
       musicTimer = setInterval(schedule, 90); schedule();
     }
-    function setLevel(n) { level = Math.max(0, Math.min(2, n | 0)); }
+    function setLevel(n) {
+      const nl = Math.max(0, Math.min(2, n | 0));
+      if (nl === level) return;
+      const up = nl > level; level = nl;
+      if (!musicOn || mode !== "turn" || !ctx) return;
+      // Louder in the rush, plus a "whoosh" riser so everyone hears the change
+      const now = ctx.currentTime;
+      musicBus.gain.cancelScheduledValues(now);
+      musicBus.gain.setTargetAtTime(musicLevel(), now, 0.08);
+      if (up) {
+        tone(220 * level, now, 0.7, { type: "sawtooth", vol: 0.12, slideTo: 1760, bus: musicBus, filter: 2600 });
+        const len = Math.floor(ctx.sampleRate * 0.7), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (i / len);
+        const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+        f.type = "bandpass"; f.frequency.setValueAtTime(600, now); f.frequency.exponentialRampToValueAtTime(7000, now + 0.7);
+        g.gain.value = 0.25; src.buffer = b; src.connect(f); f.connect(g); g.connect(musicBus); src.start(now);
+      }
+    }
     function stopMusic() {
       if (!musicOn) return; musicOn = false; clearInterval(musicTimer);
       if (ctx) { musicBus.gain.cancelScheduledValues(ctx.currentTime); musicBus.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15); }
@@ -874,14 +903,14 @@
       let cnt = 0, sx = 0, sy = 0;
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
         const i = y * w + x;
-        if (Math.abs(g[i] - last[i]) > 28) { cnt++; sx += x; sy += y; }
+        if (Math.abs(g[i] - last[i]) > 34) { cnt++; sx += x; sy += y; }
       }
       const frac = cnt / n;
       // Almost the whole picture changed: the phone itself moved (a tilt or a bump), not a hand
       if (frac > 0.6) { track = []; hold = now + 350; return; }
       // The phone is tilted (someone is using tilt right now): stay out of the way
       const up = Tilt.lastUp; if (up !== null && Math.abs(up) > 0.45) { track = []; return; }
-      if (frac > 0.025) {
+      if (frac > 0.04) {
         // Screen is sideways but the camera picture is upright (or the other way round): swap the axes
         const swap = (vw < vh) !== (window.innerWidth < window.innerHeight);
         let cx = sx / cnt / w, cy = sy / cnt / h; if (swap) { const t = cx; cx = cy; cy = t; }
@@ -891,18 +920,18 @@
       } else if (track.length) decide(true);
     }
     function decide(ended) {
-      if (track.length < 3) { if (ended) track = []; return; }
+      if (track.length < 4) { if (ended) track = []; return; }
       let minX = 1, maxX = 0, minY = 1, maxY = 0;
       track.forEach(p => { minX = Math.min(minX, p.cx); maxX = Math.max(maxX, p.cx); minY = Math.min(minY, p.cy); maxY = Math.max(maxY, p.cy); });
       const a = track[0], b = track[track.length - 1];
       const dx = Math.abs(b.cx - a.cx), dy = Math.abs(b.cy - a.cy);
       const spanX = maxX - minX, spanY = maxY - minY;
-      const need = ended ? 0.28 : 0.42; // fire early on a big sweep, otherwise when the hand leaves
+      const need = ended ? 0.36 : 0.5; // fire early on a big sweep, otherwise when the hand leaves
       let dir = null;
-      if (Math.max(dy, spanY * 0.8) > need && dy > dx * 1.4) dir = "vertical";
-      else if (Math.max(dx, spanX * 0.8) > need && dx > dy * 1.4) dir = "side";
+      if (Math.max(dy, spanY * 0.8) > need && dy > dx * 1.6) dir = "vertical";
+      else if (Math.max(dx, spanX * 0.8) > need && dx > dy * 1.6) dir = "side";
       if (dir) {
-        track = []; hold = performance.now() + 900;
+        track = []; hold = performance.now() + 1100;
         const c = $("#hud-wave"); if (c) { c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); }
         score((dir === "vertical") !== settings.swipeSwap ? "got" : "pass", "wave");
       } else if (ended) track = [];

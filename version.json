@@ -1,8 +1,8 @@
 {
-  "version": "1.4.1",
-  "notes": "New music during turns: a soft beat while you play that speeds up, gets louder drums, and jumps up a key in the last 10 seconds, then pushes even harder in the last 3.",
+  "version": "1.4.3",
+  "notes": "Louder turn music with a big change at 10 seconds left: a whoosh, a faster alarm-style riff, a key jump, and more volume, then even more at 3 seconds. Hand waves are a little less sensitive.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.1/TiltAndTell-1.4.1.apk",
-    "sha256": "957876b2dc205e36ff9888918a077b169295e0278a8fa0a51101ee2f0fdfa34b"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.3/TiltAndTell-1.4.3.apk",
+    "sha256": "4935a597f190a558d52dda0a083959c7c6f2d89c4cf4307c3a25bd888951fb63"
   }
 }

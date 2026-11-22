@@ -1,5 +1,12 @@
 # Tilt & Tell release notes
 
+## 1.4.3
+- The last 10 seconds now sound clearly different: a whoosh, a much faster tempo, a fast alarm-style riff instead of the tune, a key jump, and louder music. At 3 seconds it kicks up again.
+- Hand waves are a little less sensitive: the hand has to move farther and more clearly up-down or side-to-side.
+
+## 1.4.2
+- Turn music is about three times louder, with sounds that phone speakers can actually play (deep bass alone gets lost). A limiter keeps it from crackling.
+
 ## 1.4.1
 - Music during turns: a soft beat plays while you guess. In the last 10 seconds it speeds up, jumps up a key, and adds claps and busier drums. In the last 3 seconds it pushes even harder.
 - It plays quieter when voice is on so the phone can still hear you. Turn it off in Settings under Music during turns.
