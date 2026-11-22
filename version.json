@@ -1,8 +1,8 @@
 {
-  "version": "1.4.0",
-  "notes": "Hand waves over the camera (up or down for Got it, side to side to Pass), 24 new categories (60 in all), a One category or Mix choice, NEW badges and quick section buttons on the category screen, and snappier swipes.",
+  "version": "1.4.1",
+  "notes": "New music during turns: a soft beat while you play that speeds up, gets louder drums, and jumps up a key in the last 10 seconds, then pushes even harder in the last 3.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.0/TiltAndTell-1.4.0.apk",
-    "sha256": "ea417fa6d16ad3fe624c34d6f1929eba5a9ec2b697ceabcbb5781d3c678638c3"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.1/TiltAndTell-1.4.1.apk",
+    "sha256": "957876b2dc205e36ff9888918a077b169295e0278a8fa0a51101ee2f0fdfa34b"
   }
 }

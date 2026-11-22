@@ -1,5 +1,9 @@
 # Tilt & Tell release notes
 
+## 1.4.1
+- Music during turns: a soft beat plays while you guess. In the last 10 seconds it speeds up, jumps up a key, and adds claps and busier drums. In the last 3 seconds it pushes even harder.
+- It plays quieter when voice is on so the phone can still hear you. Turn it off in Settings under Music during turns.
+
 ## 1.4.0
 - Hand waves: turn on "Hand wave (camera)" in Settings, then wave across the front camera while the phone is on your forehead. Up or down is Got it, side to side is Pass. The flip switch swaps them. The camera picture never leaves the phone, and a 👋 shows while it's on.
 - 24 new categories (60 in all): Fruits & Veggies, Desserts & Sweets, Breakfast & Drinks, Bugs & Birds, Farm & Pets, Plants & Flowers, Books of the Bible, Faith Words, Around the House, Clothes & Accessories, Tools & Building, Superpowers & Spy Gear, Planets & Space, Summer Fun, Winter Wonderland, Fall & Thanksgiving, Spring & Easter, Hobbies & Crafts, Dance Moves, Animal Charades, Around Town, History & Heroes, Colors & Shapes, and Baby Animals.

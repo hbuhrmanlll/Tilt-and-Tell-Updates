@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -24,7 +24,7 @@
   /* ---------------- Settings ---------------- */
   const DEFAULTS = {
     ctlTilt: true, ctlSwipe: true, ctlButtons: true, ctlVoice: false, voiceAnswer: true,
-    tiltFlip: false, swipeSwap: false, ctlWave: false, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
+    tiltFlip: false, swipeSwap: false, ctlWave: false, turnMusic: true, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
   };
   const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
   const saveSettings = () => store.set("settings", settings);
@@ -111,7 +111,7 @@
 
   /* ---------------- Audio (all made in code) ---------------- */
   const Audio = (() => {
-    let ctx = null, master = null, sfxBus = null, musicBus = null, musicTimer = null, musicOn = false, nextBeat = 0, beatIdx = 0;
+    let ctx = null, master = null, sfxBus = null, musicBus = null, musicTimer = null, musicOn = false, nextBeat = 0, beatIdx = 0, mode = "menu", level = 0;
     function ensure() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
@@ -124,8 +124,10 @@
       if (!ctx) return;
       master.gain.value = settings.mute ? 0 : 1;
       sfxBus.gain.value = (settings.sfxVol / 100) * 0.9;
-      musicBus.gain.value = (settings.musicVol / 100) * 0.32;
+      musicBus.gain.value = musicLevel();
     }
+    // Turn music is a bit quieter, and quieter still when voice is on so the phone can hear you
+    function musicLevel() { return (settings.musicVol / 100) * 0.32 * (mode === "turn" ? (settings.ctlVoice ? 0.45 : 0.8) : 1); }
     function tone(freq, start, dur, { type = "sine", vol = 0.3, attack = 0.005, bus = sfxBus, slideTo = null, filter = null } = {}) {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = type; o.frequency.setValueAtTime(freq, start);
@@ -163,40 +165,65 @@
     };
     function play(name, arg) { if (settings.mute || !settings.sfxVol) return; if (!ensure()) return; try { sfx[name](arg); } catch (e) {} }
 
-    /* Menu music: a relaxed, bouncy four-chord loop at 96 BPM. Quiet on purpose. */
-    const BPM = 96, STEP = 60 / BPM / 2; // eighth notes
+    /* Music: one bouncy four-chord loop.
+       Menu: relaxed, 96 BPM.
+       Turn: 116 BPM with a light kick and hi-hat.
+       Last 10 seconds: speeds up, jumps up a key, and the drums get busier.
+       Last 3 seconds: faster again with a rising synth pulse. */
     const CHORDS = [[261.6, 329.6, 392.0], [220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [196.0, 246.9, 293.7]];
     const BASS = [130.8, 110.0, 87.3, 98.0];
     const MELODY = [784, 0, 659, 0, 587, 659, 0, 523, 659, 0, 523, 0, 440, 523, 0, 0, 698, 0, 659, 0, 587, 523, 0, 440, 587, 0, 494, 0, 523, 0, 0, 0];
+    const bpm = () => mode === "menu" ? 96 : [116, 138, 156][level];
+    const key = () => mode === "menu" ? 1 : [1, Math.pow(2, 2 / 12), Math.pow(2, 3 / 12)][level];
+    function hat(t, vol) {
+      const len = Math.floor(ctx.sampleRate * 0.03), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      f.type = "highpass"; f.frequency.value = 6000; g.gain.value = vol; src.buffer = b; src.connect(f); f.connect(g); g.connect(musicBus); src.start(t);
+    }
+    function kick(t, vol) { tone(140, t, 0.16, { type: "sine", vol, slideTo: 45, bus: musicBus }); }
     function schedule() {
       while (nextBeat < ctx.currentTime + 0.25) {
+        const STEP = 60 / bpm() / 2, k = key(); // eighth notes
         const bar = Math.floor(beatIdx / 8) % 4, step = beatIdx % 8, t = nextBeat;
-        if (step === 0 || step === 4) CHORDS[bar].forEach(f => tone(f, t, STEP * 3.6, { type: "triangle", vol: 0.05, attack: 0.03, bus: musicBus, filter: 1500 }));
-        if (step % 2 === 0) tone(BASS[bar], t, STEP * 1.6, { type: "sine", vol: 0.2, bus: musicBus });
-        const m = MELODY[beatIdx % 32]; if (m) tone(m, t, STEP * 0.9, { type: "sine", vol: 0.06, bus: musicBus });
-        if (step % 2 === 1) { /* soft shaker */
-          const len = Math.floor(ctx.sampleRate * 0.03), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
-          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
-          const s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-          f.type = "highpass"; f.frequency.value = 6000; g.gain.value = 0.05; s.buffer = b; s.connect(f); f.connect(g); g.connect(musicBus); s.start(t);
+        if (step === 0 || step === 4) CHORDS[bar].forEach(f => tone(f * k, t, STEP * 3.6, { type: "triangle", vol: 0.05, attack: 0.03, bus: musicBus, filter: 1500 }));
+        if (step % 2 === 0) tone(BASS[bar] * k, t, STEP * 1.6, { type: "sine", vol: 0.2, bus: musicBus });
+        const m = MELODY[beatIdx % 32]; if (m) tone(m * k, t, STEP * 0.9, { type: "sine", vol: 0.06, bus: musicBus });
+        if (mode === "menu") { if (step % 2 === 1) hat(t, 0.05); }
+        else {
+          if (step === 0 || step === 4 || (level > 0 && step % 2 === 0)) kick(t, level ? 0.3 : 0.22);
+          hat(t, step % 2 ? 0.07 : 0.04);
+          if (level > 0) hat(t + STEP / 2, 0.04);
+          if (level > 0 && (step === 2 || step === 6)) { /* clap on the backbeat */
+            const len = Math.floor(ctx.sampleRate * 0.08), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
+            for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+            const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+            f.type = "bandpass"; f.frequency.value = 1500; g.gain.value = 0.18; src.buffer = b; src.connect(f); f.connect(g); g.connect(musicBus); src.start(t);
+          }
+          if (level === 2) tone(BASS[bar] * k * 4 * (1 + (beatIdx % 8) / 16), t, STEP * 0.7, { type: "square", vol: 0.035, bus: musicBus, filter: 2200 });
         }
         nextBeat += STEP; beatIdx++;
       }
     }
-    function startMusic() {
-      if (musicOn || settings.mute || !settings.musicVol) return;
+    function startMusic(m) {
+      const want = m === "turn" ? "turn" : "menu";
+      if (settings.mute || !settings.musicVol) return;
       if (!ensure()) return;
-      musicOn = true; nextBeat = ctx.currentTime + 0.1; beatIdx = 0;
+      if (musicOn && mode === want) return;
+      mode = want; if (want === "menu") level = 0;
       musicBus.gain.cancelScheduledValues(ctx.currentTime);
       musicBus.gain.setValueAtTime(0.0001, ctx.currentTime);
-      musicBus.gain.linearRampToValueAtTime((settings.musicVol / 100) * 0.32, ctx.currentTime + 1.2);
+      musicBus.gain.linearRampToValueAtTime(musicLevel(), ctx.currentTime + (want === "turn" ? 0.4 : 1.2));
+      if (musicOn) return;
+      musicOn = true; nextBeat = ctx.currentTime + 0.1; beatIdx = 0;
       musicTimer = setInterval(schedule, 90); schedule();
     }
+    function setLevel(n) { level = Math.max(0, Math.min(2, n | 0)); }
     function stopMusic() {
       if (!musicOn) return; musicOn = false; clearInterval(musicTimer);
       if (ctx) { musicBus.gain.cancelScheduledValues(ctx.currentTime); musicBus.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15); }
     }
-    return { ensure, play, startMusic, stopMusic, applyVolumes, get musicOn() { return musicOn; } };
+    return { ensure, play, startMusic, stopMusic, setLevel, applyVolumes, get musicOn() { return musicOn; } };
   })();
 
   function buzz(pattern) {
@@ -570,6 +597,7 @@
     Tilt.arm();
     clearInterval(turn.timer); turn.timer = setInterval(tickTimer, 100);
     Voice.start();
+    Audio.setLevel(0); if (settings.turnMusic) Audio.startMusic("turn");
   }
   let lastWhole = null;
   function tickTimer() {
@@ -588,6 +616,7 @@
     $("#timer-ring").style.strokeDashoffset = String(119.4 * (1 - frac));
     $("#play-timer").classList.toggle("is-low", whole <= 10);
     $("#play-stage").classList.toggle("is-hurry", turn.running && whole <= 10 && whole > 0);
+    if (turn.running) Audio.setLevel(whole <= 3 ? 2 : whole <= 10 ? 1 : 0);
   }
 
   function nextWord() {
@@ -679,7 +708,7 @@
 
   function timeUp() {
     if (!turn.running) return;
-    turn.running = false; clearInterval(turn.timer); Voice.stop(); Tilt.stop(); Wave.stop();
+    turn.running = false; clearInterval(turn.timer); Voice.stop(); Tilt.stop(); Wave.stop(); Audio.stopMusic();
     turn.left = 0; updateTimer(); $("#play-stage").classList.remove("is-hurry");
     // the word on screen when time ran out counts as a pass only if it was never answered
     const ov = $("#play-overlay"); ov.className = "play-overlay show time";
@@ -690,17 +719,17 @@
 
   function pauseTurn() {
     if (!turn.running || turn.paused) return;
-    turn.paused = true; turn.left = Math.max(0, (turn.endAt - performance.now()) / 1000); Voice.stop(); Wave.stop();
+    turn.paused = true; turn.left = Math.max(0, (turn.endAt - performance.now()) / 1000); Voice.stop(); Wave.stop(); Audio.stopMusic();
     modal("Paused", `${Math.ceil(turn.left)} seconds left.`, [
       { label: "Resume", kind: "btn-primary", fn: resumeTurn },
       { label: "End this turn", kind: "btn-ghost", fn: () => { turn.paused = false; turn.endAt = performance.now(); tickTimer(); } },
       { label: "Quit game", kind: "btn-danger", fn: () => { endPlaySession(); history.length = 0; show("home", { push: false }); } }
     ]);
   }
-  function resumeTurn() { turn.paused = false; turn.endAt = performance.now() + turn.left * 1000; turn.wordShownAt = performance.now(); Voice.start(); Wave.start(); }
+  function resumeTurn() { turn.paused = false; turn.endAt = performance.now() + turn.left * 1000; turn.wordShownAt = performance.now(); Voice.start(); Wave.start(); if (settings.turnMusic) Audio.startMusic("turn"); }
   function endPlaySession() {
     turn.running = false; turn.paused = false; clearInterval(turn.timer); clearTimeout(turn.waitTimer); turn.countingDown = false;
-    Voice.stop(); Tilt.stop(); Wave.stop(); exitFullscreen(); releaseAwake(); $("#play-wait").classList.remove("show"); $("#play-overlay").className = "play-overlay";
+    Voice.stop(); Tilt.stop(); Wave.stop(); Audio.stopMusic(); exitFullscreen(); releaseAwake(); $("#play-wait").classList.remove("show"); $("#play-overlay").className = "play-overlay";
     $("#rotate-hint").classList.remove("show");
   }
   $("#play-pause").addEventListener("click", e => { e.stopPropagation(); Audio.play("tap"); pauseTurn(); });
