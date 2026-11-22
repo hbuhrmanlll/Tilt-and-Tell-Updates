@@ -1,5 +1,5 @@
 /* Tilt & Tell offline cache. Bump VERSION on every release. */
-const VERSION = "tt-1.3.0";
+const VERSION = "tt-1.4.0";
 const FILES = ["./", "index.html", "styles.css", "app.js", "categories.js", "manifest.webmanifest",
   "fonts/bricolage-latin.woff2", "fonts/bricolage-latin-ext.woff2", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });

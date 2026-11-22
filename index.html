@@ -139,7 +139,12 @@
       <button class="bar-link" id="cats-surprise">Surprise me</button>
     </header>
     <div class="cats-search">
+      <div class="chips chips-sm pick-chips" role="radiogroup" aria-label="How many decks" id="pick-chips">
+        <button role="radio" data-pick="one">One deck</button>
+        <button role="radio" data-pick="mix">Mix several</button>
+      </div>
       <p class="star-row"><span class="star-pill" aria-label="Your stars">⭐ <span id="star-count">0</span></span><span class="star-hint" id="star-hint"></span></p>
+      <div class="cat-jumps" id="cat-jumps" aria-label="Jump to a section" hidden></div>
       <input type="search" id="cat-search" placeholder="Search categories" autocomplete="off" aria-label="Search categories" maxlength="40">
     </div>
     <div class="scroll" id="cat-scroll">
@@ -182,6 +187,7 @@
         <div class="hud-cat" id="play-cat"></div>
         <div class="hud-right">
           <span class="hud-streak" id="hud-streak" hidden aria-label="Streak"></span>
+          <span class="hud-wave" id="hud-wave" hidden aria-label="Hand waves are on" title="Hand waves are on">👋</span>
           <span class="hud-mic" id="hud-mic" hidden aria-label="Listening">🎤</span>
           <span class="hud-score" id="play-score" aria-label="Score">0</span>
           <div class="hud-timer" id="play-timer" role="timer" aria-live="off"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t-track" cx="22" cy="22" r="19"/><circle class="t-fill" id="timer-ring" cx="22" cy="22" r="19"/></svg><span id="timer-num">60</span></div>
@@ -270,7 +276,8 @@
       <div class="list">
         <label class="row"><span><strong>Tilt</strong><small>Tilt down for got it, up to pass</small></span><input type="checkbox" class="switch" data-set="ctlTilt"></label>
         <label class="row"><span><strong>Swipe</strong><small>Up or down got it, left or right pass</small></span><input type="checkbox" class="switch" data-set="ctlSwipe"></label>
-        <label class="row"><span><strong>Flip swipe directions</strong><small>Left or right got it, up or down pass</small></span><input type="checkbox" class="switch" data-set="swipeSwap"></label>
+        <label class="row"><span><strong>Hand wave (camera)</strong><small id="wave-support">Wave over the front camera: up or down got it, side to side pass. The picture never leaves your phone.</small></span><input type="checkbox" class="switch" data-set="ctlWave"></label>
+        <label class="row"><span><strong>Flip swipe and wave directions</strong><small>Side to side got it, up or down pass</small></span><input type="checkbox" class="switch" data-set="swipeSwap"></label>
         <label class="row"><span><strong>On-screen buttons</strong><small>Big Pass and Got it buttons</small></span><input type="checkbox" class="switch" data-set="ctlButtons"></label>
         <label class="row"><span><strong>Voice</strong><small id="voice-support">Say “got it” or “pass”</small></span><input type="checkbox" class="switch" data-set="ctlVoice"></label>
         <label class="row"><span><strong>Say the answer to score</strong><small>Counts it when the mic hears the word</small></span><input type="checkbox" class="switch" data-set="voiceAnswer"></label>

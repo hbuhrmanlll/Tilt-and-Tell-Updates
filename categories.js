@@ -179,6 +179,126 @@ window.TT_CATEGORIES = [
     items: "Piece of Cake|Break a Leg|Hit the Hay|Under the Weather|Spill the Beans|Let the Cat Out of the Bag|Raining Cats and Dogs|Cost an Arm and a Leg|Once in a Blue Moon|Bite the Bullet|Hit the Road|Cold Feet|Cool as a Cucumber|Busy as a Bee|Early Bird Gets the Worm|Butterflies in My Stomach|Cry Over Spilled Milk|Couch Potato|Back to Square One|The Ball Is in Your Court|Beat Around the Bush|Bend Over Backwards|Better Late Than Never|Bite Off More Than You Can Chew|Call It a Day|Cross That Bridge When You Come to It|Cut to the Chase|Don't Count Your Chickens|Easy as Pie|Every Cloud Has a Silver Lining|Get Out of Hand|Go the Extra Mile|Hang in There|Hit the Nail on the Head|In the Same Boat|It Takes Two to Tango|Jump on the Bandwagon|Keep Your Chin Up|Kill Two Birds with One Stone|Last but Not Least|Let Sleeping Dogs Lie|Make a Long Story Short|Miss the Boat|No Pain, No Gain|On Cloud Nine|On the Fence|Out of the Blue|Over the Moon|Pull Someone's Leg|Rome Wasn't Built in a Day|Sit Tight|Sleep on It|Take a Rain Check|The Last Straw|Throw in the Towel|Time Flies|Two Peas in a Pod|Up in the Air|Walking on Eggshells|When Pigs Fly|You Can't Judge a Book by Its Cover|A Penny for Your Thoughts|Actions Speak Louder Than Words|All Ears|Apple of My Eye|Barking Up the Wrong Tree|Bigger Fish to Fry|Burn the Midnight Oil|Calm Before the Storm|Elephant in the Room|Fish Out of Water|Get the Ball Rolling|Grass Is Always Greener|Head in the Clouds|Heart of Gold|Hold Your Horses|Like a Kid in a Candy Store|Love Your Neighbor|Turn the Other Cheek|Salt of the Earth|Go the Second Mile|A Drop in the Bucket|Practice Makes Perfect|Rise and Shine|Sweet Dreams|Tie the Knot|Wild Goose Chase|Zip Your Lips"
   },
   {
+    id: "fruits-veggies", name: "Fruits & Veggies", emoji: "🍓", group: "Food", hue: 120,
+    desc: "Fresh from the garden and the grocery store",
+    items: "Apple|Banana|Orange|Grape|Strawberry|Blueberry|Raspberry|Blackberry|Cherry|Peach|Pear|Plum|Apricot|Mango|Pineapple|Watermelon|Cantaloupe|Honeydew|Kiwi|Lemon|Lime|Grapefruit|Coconut|Papaya|Pomegranate|Fig|Date|Raisin|Prune|Cranberry|Avocado|Tomato|Cucumber|Pickle|Carrot|Celery|Broccoli|Cauliflower|Cabbage|Lettuce|Spinach|Kale|Potato|Yam|Onion|Garlic|Pepper|Jalapeño|Corn|Peas|Pumpkin|Zucchini|Squash|Eggplant|Radish|Beet|Turnip|Asparagus|Artichoke|Mushroom|Olive|Ginger|Okra|Leek|Parsnip|Rhubarb|Starfruit|Dragonfruit|Nectarine|Tangerine|Clementine|Guava|Lychee|Persimmon|Gooseberry|Edamame|Sprouts|Chickpea|Lentil|Peanut|Almond|Walnut|Pecan|Cashew|Pistachio|Acorn|Sunflower|Basil|Parsley|Cilantro|Mint"
+  },
+  {
+    id: "sweets", name: "Desserts & Sweets", emoji: "🍰", group: "Food", hue: 330,
+    desc: "Cakes, cookies, candy, and treats",
+    items: "Cake|Cupcake|Cookie|Brownie|Pie|Cheesecake|Donut|Muffin|Cinnamon Roll|Pudding|Gelatin|Popsicle|Ice Cream|Sundae|Milkshake|Smoothie|Snow Cone|Cotton Candy|Lollipop|Gumdrop|Gummy Bears|Jellybean|Marshmallow|S'mores|Fudge|Caramel|Toffee|Taffy|Licorice|Chocolate|Truffle|Bonbon|Peppermint|Candy Cane|Butterscotch|Sprinkles|Frosting|Whipped Cream|Meringue|Macaron|Eclair|Cannoli|Tiramisu|Churro|Funnel Cake|Waffle|Pancake|Crepe|Scone|Biscotti|Shortcake|Cobbler|Crumble|Strudel|Baklava|Flan|Custard|Mousse|Parfait|Gelato|Sherbet|Sorbet|Popcorn|Pretzel|Snickerdoodle|Gingerbread|Fortune Cookie|Wafer|Snack Cake|Sugar|Honey|Syrup|Hazelnut|Sprinkle|Cherry-on-Top|Birthday Cake|Pinwheel|Rock Candy|Gumball|Jawbreaker|Bubblegum|Mint|Cocoa|Hot Chocolate|Lemonade|Bundt Cake|Doughnut"
+  },
+  {
+    id: "breakfast", name: "Breakfast & Drinks", emoji: "🥞", group: "Food", hue: 40,
+    desc: "Rise and shine, what's on the table?",
+    items: "Pancakes|Waffles|French Toast|Bacon|Sausage|Eggs|Omelet|Scrambled Eggs|Hash Browns|Toast|Bagel|Biscuit|Gravy|Grits|Oatmeal|Cereal|Granola|Yogurt|Muffin|Croissant|Donut|Burrito|Quiche|Sandwich|Syrup|Butter|Jelly|Jam|Peanut Butter|Honey|Milk|Chocolate Milk|Orange Juice|Apple Juice|Lemonade|Coffee|Tea|Hot Cocoa|Smoothie|Milkshake|Soda|Root Beer|Iced Tea|Water|Sparkling Water|Punch|Slushie|Eggnog|Cider|Latte|Cappuccino|Espresso|Mocha|Frappé|Kombucha|Cream|Sugar|Cinnamon|Banana|Berries|Grapefruit|Sunny-Side-Up|Poached|Benedict|Hashbrowns|Brunch|Cornflakes|Toaster Pastry|Strudel|Danish|Crumpet|Scone|Porridge|Chai|Cocoa|Kefir|Juice|Thermos|Mug|Straw|Pitcher|Teapot|Sippy-Cup|Breakfast-in-Bed"
+  },
+  {
+    id: "bugs-birds", name: "Bugs & Birds", emoji: "🐝", group: "Nature", hue: 75,
+    desc: "Things that buzz, crawl, chirp, and fly",
+    items: "Ant|Bee|Bumblebee|Wasp|Hornet|Butterfly|Moth|Caterpillar|Cocoon|Ladybug|Beetle|Firefly|Grasshopper|Cricket|Dragonfly|Mosquito|Fly|Gnat|Flea|Tick|Spider|Tarantula|Scorpion|Centipede|Millipede|Worm|Snail|Slug|Termite|Cockroach|Stinkbug|Cicada|Praying Mantis|Walking Stick|Beehive|Anthill|Cobweb|Robin|Cardinal|Blue Jay|Sparrow|Crow|Raven|Pigeon|Dove|Owl|Hawk|Eagle|Falcon|Vulture|Parrot|Parakeet|Canary|Finch|Hummingbird|Woodpecker|Seagull|Pelican|Flamingo|Peacock|Ostrich|Emu|Penguin|Puffin|Toucan|Swan|Goose|Duck|Turkey|Chicken|Rooster|Quail|Pheasant|Stork|Heron|Crane|Kingfisher|Roadrunner|Bluebird|Nest|Feather|Egg|Beak|Wings|Birdhouse|Birdbath|Scarecrow"
+  },
+  {
+    id: "farm-pets", name: "Farm & Pets", emoji: "🐄", group: "Nature", hue: 25,
+    desc: "Barnyard buddies and furry friends",
+    items: "Cow|Bull|Calf|Horse|Pony|Foal|Donkey|Mule|Pig|Piglet|Sheep|Lamb|Goat|Chicken|Rooster|Chick|Duck|Goose|Turkey|Llama|Alpaca|Rabbit|Barn|Tractor|Haystack|Silo|Scarecrow|Pitchfork|Trough|Fence|Saddle|Horseshoe|Milking|Eggs|Farmer|Cowboy|Rodeo|Lasso|Corral|Pasture|Dog|Puppy|Cat|Kitten|Hamster|Gerbil|Guinea Pig|Goldfish|Turtle|Parakeet|Ferret|Hedgehog|Lizard|Snake|Bunny|Leash|Collar|Doghouse|Fishbowl|Litter Box|Catnip|Chew Toy|Fetch|Treat|Groomer|Veterinarian|Kennel|Paw|Whiskers|Tail|Bark|Meow|Moo|Oink|Quack|Neigh|Baa|Cluck|Gobble|Poodle|Beagle|Labrador|Collie|Corgi|Husky|Bulldog|Tabby"
+  },
+  {
+    id: "plants", name: "Plants & Flowers", emoji: "🌻", group: "Nature", hue: 50,
+    desc: "Gardens, trees, and things that grow",
+    items: "Rose|Tulip|Daisy|Sunflower|Lily|Daffodil|Dandelion|Orchid|Violet|Lilac|Lavender|Marigold|Carnation|Poppy|Iris|Petunia|Pansy|Hibiscus|Magnolia|Lotus|Cactus|Fern|Moss|Ivy|Bamboo|Clover|Shamrock|Seaweed|Tree|Oak|Maple|Pine|Palm Tree|Willow|Birch|Redwood|Christmas Tree|Acorn|Pinecone|Leaf|Branch|Trunk|Roots|Seed|Sprout|Bud|Petal|Stem|Thorn|Pollen|Nectar|Bouquet|Garden|Greenhouse|Flowerpot|Watering Can|Shovel|Rake|Hoe|Wheelbarrow|Compost|Soil|Mulch|Weeds|Vine|Pumpkin Patch|Orchard|Vineyard|Meadow|Forest|Jungle|Hedge|Lawn|Grass|Wheat|Hay|Cotton|Sap|Bark|Tumbleweed|Venus Flytrap|Bonsai|Wreath|Corsage|Sunshine|Rain"
+  },
+  {
+    id: "bible-books", name: "Books of the Bible", emoji: "📖", group: "Faith", hue: 285,
+    desc: "Genesis to Revelation. Can you hint without the name?",
+    items: "Genesis|Exodus|Leviticus|Numbers|Deuteronomy|Joshua|Judges|Ruth|Samuel|Kings|Chronicles|Ezra|Nehemiah|Esther|Job|Psalms|Proverbs|Ecclesiastes|Song of Songs|Isaiah|Jeremiah|Lamentations|Ezekiel|Daniel|Hosea|Joel|Amos|Obadiah|Jonah|Micah|Nahum|Habakkuk|Zephaniah|Haggai|Zechariah|Malachi|Matthew|Mark|Luke|John|Acts|Romans|Corinthians|Galatians|Ephesians|Philippians|Colossians|Thessalonians|Timothy|Titus|Philemon|Hebrews|James|Peter|Jude|Revelation|Old Testament|New Testament|Gospels|Psalm 23|Beatitudes|Ten Commandments|Lord's Prayer|Fruit of the Spirit|Armor of God|Love Chapter|Great Commission|Creation|Sermon on the Mount"
+  },
+  {
+    id: "faith-words", name: "Faith Words", emoji: "🕊️", group: "Faith", hue: 210,
+    desc: "Words you hear at church and in the Bible",
+    items: "Grace|Mercy|Faith|Hope|Love|Joy|Peace|Patience|Kindness|Goodness|Faithfulness|Gentleness|Self-Control|Salvation|Baptism|Communion|Worship|Prayer|Praise|Hallelujah|Amen|Hosanna|Gospel|Cross|Resurrection|Forgiveness|Repentance|Heaven|Angel|Disciple|Apostle|Prophet|Pentecost|Revival|Testimony|Missionary|Offering|Tithe|Fasting|Blessing|Covenant|Scripture|Psalm|Parable|Miracle|Shepherd|Lamb|Dove|Altar|Sanctuary|Choir|Hymn|Sermon|Pastor|Fellowship|Eternity|Redemption|Holiness|Righteousness|Trinity|Messiah|Savior|Spirit|Anointing|Shield|Sword|Helmet|Breastplate|Kingdom|Glory|Thankfulness|Obedience|Wisdom|Courage|Humility|Servant|Ministry|Evangelist|Deacon|Usher|Pew|Pulpit|Bible|Devotional|Benediction|Doxology|Encourage|Grateful"
+  },
+  {
+    id: "house", name: "Around the House", emoji: "🏠", group: "Stuff", hue: 180,
+    desc: "Rooms, furniture, and home sweet home",
+    items: "Kitchen|Bedroom|Bathroom|Living Room|Basement|Attic|Garage|Closet|Hallway|Staircase|Porch|Patio|Deck|Balcony|Chimney|Fireplace|Roof|Window|Door|Doorknob|Doorbell|Mailbox|Fence|Driveway|Sidewalk|Backyard|Swing Set|Trampoline|Treehouse|Sandbox|Couch|Sofa|Recliner|Armchair|Ottoman|Coffee Table|Bookshelf|Desk|Bed|Bunk Bed|Crib|Dresser|Nightstand|Mattress|Pillow|Blanket|Quilt|Curtains|Blinds|Rug|Carpet|Lamp|Chandelier|Ceiling Fan|Thermostat|Outlet|Light Switch|Smoke Alarm|Mirror|Bathtub|Shower|Toilet|Sink|Faucet|Towel|Laundry|Washer|Dryer|Vacuum|Broom|Mop|Dishwasher|Fridge|Pantry|Cupboard|Countertop|Toaster|Microwave|Clock|Calendar|Painting|Plant|Wallpaper|Doormat|Welcome Mat|Key|Lock|Alarm|Wi-Fi|Television|Remote|Bean Bag"
+  },
+  {
+    id: "clothes", name: "Clothes & Accessories", emoji: "👕", group: "Stuff", hue: 300,
+    desc: "What to wear, from head to toe",
+    items: "Shirt|T-Shirt|Hoodie|Sweater|Sweatshirt|Jacket|Coat|Vest|Blazer|Tuxedo|Suit|Tie|Bow Tie|Dress|Skirt|Gown|Pajamas|Robe|Jeans|Pants|Shorts|Overalls|Leggings|Sweatpants|Socks|Shoes|Sneakers|Boots|Sandals|Flip-Flops|Slippers|Cleats|High Heels|Hat|Cap|Beanie|Cowboy Hat|Top Hat|Helmet|Headband|Bandana|Scarf|Gloves|Mittens|Earmuffs|Sunglasses|Glasses|Watch|Bracelet|Necklace|Ring|Earrings|Belt|Suspenders|Backpack|Purse|Wallet|Umbrella|Raincoat|Swimsuit|Goggles|Uniform|Costume|Cape|Mask|Apron|Bib|Diaper|Tutu|Kilt|Poncho|Parka|Zipper|Button|Pocket|Collar|Sleeve|Hood|Shoelace|Jersey|Tank Top|Polo|Flannel|Onesie|Crown|Tiara|Veil|Sombrero"
+  },
+  {
+    id: "tools", name: "Tools & Building", emoji: "🔨", group: "Stuff", hue: 20,
+    desc: "Fix it, build it, measure it",
+    items: "Hammer|Nail|Screwdriver|Screw|Wrench|Pliers|Saw|Chainsaw|Drill|Level|Tape Measure|Ruler|Toolbox|Toolbelt|Ladder|Sandpaper|Paintbrush|Paint Roller|Paint Can|Bucket|Shovel|Pickaxe|Crowbar|Axe|Hatchet|Mallet|Chisel|Clamp|Vise|Bolt|Nut|Washer|Hinge|Brick|Cement|Concrete|Lumber|Plank|Plywood|Drywall|Shingle|Pipe|Faucet|Wire|Outlet|Fuse|Flashlight|Hard Hat|Safety Goggles|Gloves|Workbench|Sawhorse|Wheelbarrow|Bulldozer|Crane|Forklift|Cement Mixer|Dump Truck|Scaffold|Blueprint|Architect|Carpenter|Plumber|Electrician|Welder|Duct Tape|Glue|Staple Gun|Caulk|Stud Finder|Measuring|Sledgehammer|Jackhammer|Trowel|Rake|Hoe|Pitchfork|Sprinkler|Hose|Magnet|Pulley|Lever|Gear|Spring|Rope|Chain|Padlock"
+  },
+  {
+    id: "superpowers", name: "Superpowers & Spy Gear", emoji: "⚡", group: "Characters", hue: 260,
+    desc: "Powers, gadgets, and secret missions",
+    items: "Invisibility|Flying|Teleport|Telepathy|Super Strength|Super Speed|X-Ray Vision|Laser Eyes|Time Travel|Shapeshifting|Mind Reading|Force Field|Healing|Freeze Ray|Shrinking|Growing|Stretching|Wall Crawling|Underwater Breathing|Fire Breathing|Lightning|Ice Powers|Magnetism|Super Jump|Night Vision|Sidekick|Secret Identity|Cape|Mask|Utility Belt|Hideout|Lair|Gadget|Jetpack|Grappling Hook|Spy|Secret Agent|Disguise|Mustache|Trench Coat|Binoculars|Walkie-Talkie|Code Name|Secret Code|Decoder|Fingerprint|Magnifying Glass|Detective|Clue|Mystery|Laser Maze|Night-Vision Goggles|Hologram|Robot|Cyborg|Android|Rocket Boots|Shrink Ray|Invisibility Cloak|Hero|Villain|Rescue|Mission|Headquarters|Spaceship|Escape|Sneak|Stealth|Tracker|Radar|Submarine|Helicopter|Parachute|Zipline|Vault|Safe|Password|Satellite|Alarm|Spotlight|Hideaway|Doomsday|Countdown|Shield"
+  },
+  {
+    id: "space", name: "Planets & Space", emoji: "🪐", group: "Smart", hue: 245,
+    desc: "Blast off into the stars",
+    items: "Sun|Moon|Mercury|Venus|Earth|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Planet|Star|Galaxy|Milky Way|Comet|Asteroid|Meteor|Meteorite|Black Hole|Supernova|Nebula|Constellation|Big Dipper|Orion|North Star|Eclipse|Crater|Orbit|Gravity|Astronaut|Cosmonaut|Rocket|Space Shuttle|Space Station|Satellite|Telescope|Observatory|Rover|Lander|Launch Pad|Countdown|Blast Off|Spacesuit|Helmet|Moonwalk|Zero Gravity|Alien|UFO|Flying Saucer|Mission Control|Light-Year|Solar System|Universe|Cosmos|Big Bang|Sunspot|Solar Flare|Aurora|Shooting Star|Wormhole|Exoplanet|Quasar|Pulsar|Dwarf Planet|Rings|Lunar|Solar|Starlight|Twinkle|Space Dog|Moon Rock|Moon Base|Space Food|Planetarium|Astronomer|Stargazing|Crescent|Full Moon|Half Moon|Equinox|Solstice|Horizon|Sky|Space Junk|Spacewalk|Jet|Capsule"
+  },
+  {
+    id: "summer", name: "Summer Fun", emoji: "☀️", group: "Seasons", hue: 45,
+    desc: "Sunshine, pools, and road trips",
+    items: "Beach|Pool|Sunscreen|Sunglasses|Sunburn|Swimsuit|Flip-Flops|Beach Towel|Beach Ball|Sandcastle|Seashell|Bucket|Shovel|Surfboard|Boogie Board|Snorkel|Goggles|Cannonball|Belly Flop|Diving Board|Water Slide|Water Park|Lifeguard|Floatie|Pool Noodle|Squirt Gun|Water Balloon|Sprinkler|Slip and Slide|Popsicle|Ice Cream Truck|Lemonade Stand|Watermelon|Barbecue|Grill|Hot Dog|Hamburger|Corn on the Cob|S'mores|Campfire|Tent|Sleeping Bag|Fireflies|Mosquito|Fireworks|Parade|Picnic|Road Trip|Vacation|Camp|Canoe|Kayak|Fishing|Hiking|Bike Ride|Roller Coaster|Ferris Wheel|Carnival|County Fair|Cotton Candy|Baseball|Frisbee|Hammock|Sunflower|Thunderstorm|Heat Wave|Fan|Air Conditioner|Shade|Tan|Sunhat|Cooler|Sandals|Sundress|Seagull|Crab|Pier|Boardwalk|Lighthouse|Sailboat|Jet Ski|Island|Volleyball|Tube|Lake|Dock"
+  },
+  {
+    id: "winter", name: "Winter Wonderland", emoji: "⛄", group: "Seasons", hue: 200,
+    desc: "Snow days and cozy nights",
+    items: "Snow|Snowflake|Snowman|Snowball|Snowball Fight|Snow Angel|Snow Day|Snowplow|Snowboard|Skiing|Sled|Sledding|Toboggan|Ice Skating|Hockey|Igloo|Icicle|Frost|Blizzard|Avalanche|Hail|Sleet|Fireplace|Hot Cocoa|Marshmallow|Mittens|Gloves|Scarf|Beanie|Earmuffs|Boots|Parka|Snow Pants|Long Johns|Blanket|Quilt|Fuzzy Socks|Snow Globe|Penguin|Polar Bear|Reindeer|Arctic Fox|Snowy Owl|Hibernate|Cabin|Chimney|Shovel|Salt Truck|Ice Scraper|Windshield|Frozen Pond|Ice Fishing|Snowmobile|Ski Lift|Chairlift|Hot Tub|Soup|Chili|Gingerbread|Candy Cane|Christmas Lights|Wreath|Sweater|Flannel|Fleece|Shiver|Brrr|Frostbite|Cold|Freezing|Snowdrift|Slush|Puddle|Icy|Slip|Cozy|Pajamas|Nap|Movie Night|New Year's|Groundhog|Valentine"
+  },
+  {
+    id: "fall", name: "Fall & Thanksgiving", emoji: "🍂", group: "Seasons", hue: 28,
+    desc: "Leaves, harvest, and giving thanks",
+    items: "Leaves|Leaf Pile|Rake|Acorn|Squirrel|Pumpkin|Pumpkin Patch|Pumpkin Pie|Pumpkin Spice|Hayride|Hay Bale|Corn Maze|Scarecrow|Harvest|Apple Picking|Apple Cider|Caramel Apple|Candy Corn|Bonfire|Hoodie|Sweater|Flannel|Boots|Football|Homecoming|Tailgate|Marching Band|Back to School|School Bus|Turkey|Pilgrim|Mayflower|Cornucopia|Thanksgiving|Grateful|Thankful|Stuffing|Mashed Potatoes|Gravy|Cranberry Sauce|Green Bean Casserole|Sweet Potato|Dinner Rolls|Wishbone|Leftovers|Nap|Parade|Family|Feast|Table|Blessing|Prayer|Gourd|Maple|Oak|Golden|Orange|Crunchy|Breeze|Chilly|Migration|Geese|Owl|Harvest Moon|Sunflower|Wagon|Tractor|Farm Stand|Cinnamon|Nutmeg|Pie|Cobbler|Corn|Hay|Chili|Campfire|Marshmallow|Fall Festival|Trunk-or-Treat|Costume|Candy|Daylight Saving|Rain Jacket"
+  },
+  {
+    id: "spring-easter", name: "Spring & Easter", emoji: "🐣", group: "Seasons", hue: 90,
+    desc: "New life, flowers, and He is risen",
+    items: "Easter|Resurrection|Empty Tomb|He Is Risen|Palm Sunday|Good Friday|Cross|Stone|Sunrise Service|Lily|Easter Egg|Egg Hunt|Easter Basket|Jellybeans|Chick|Bunny|Lamb|Duckling|Bonnet|Sunday Dress|Ham|Spring|Rain|Puddle|Rainbow|Umbrella|Rain Boots|Raincoat|Mud|Worm|Robin|Nest|Bird Egg|Butterfly|Caterpillar|Bee|Ladybug|Tulip|Daffodil|Daisy|Blossom|Cherry Blossom|Dandelion|Garden|Seeds|Sprout|Planting|Watering Can|Lawn Mower|Kite|Picnic|Baseball|Softball|Track Meet|Spring Break|Spring Cleaning|Allergies|Sneeze|Pollen|Thunderstorm|Breeze|Green|Pastel|Bloom|Sunshine|Tadpole|Frog|Calf|Foal|Hatch|Fresh|Mother's Day|Graduation|Prom|Field Day|Bike|Jump Rope|Sidewalk Chalk|Hopscotch|Bubbles|Pinwheel|Flower Crown|Lemonade"
+  },
+  {
+    id: "crafts", name: "Hobbies & Crafts", emoji: "🎨", group: "Activities", hue: 315,
+    desc: "Make it, paint it, collect it",
+    items: "Painting|Drawing|Sketching|Coloring|Crayons|Markers|Paintbrush|Easel|Canvas|Watercolor|Clay|Pottery|Sculpture|Origami|Paper Airplane|Scrapbook|Stickers|Glitter|Glue|Scissors|Yarn|Knitting|Crochet|Sewing|Quilting|Embroidery|Weaving|Friendship Bracelet|Beads|Tie-Dye|Candle Making|Soap Making|Woodworking|Whittling|Model Car|Model Rocket|Building Blocks|Puzzle|Puzzle Cube|Chess|Checkers|Card Tricks|Magic Tricks|Juggling|Photography|Filmmaking|Podcast|Blogging|Journaling|Reading|Writing|Poetry|Calligraphy|Baking|Cooking|Gardening|Bird Watching|Fishing|Hiking|Camping|Stamp Collecting|Coin Collecting|Rock Collecting|Trading Cards|Video Games|Board Games|Skateboarding|Dancing|Singing|Piano|Guitar|Drums|Karaoke|Chalk Art|Mosaic|Collage|Pipe Cleaner|Popsicle Sticks|Paper Mache|Finger Painting|Stencil|Graffiti|Cartoon|Comic Book|Animation|3D Printing|Robotics|Coding|Kite Flying"
+  },
+  {
+    id: "dances", name: "Dance Moves", emoji: "🕺", group: "Acting", hue: 280,
+    desc: "Show the move, don't say it!",
+    items: "Moonwalk|Robot|Sprinkler|Lawnmower|Shopping Cart|Running Man|Worm|Floss|Dab|Disco|Twist|Chicken Dance|Macarena|Cha-Cha|Conga Line|Limbo|Hula|Tap Dance|Ballet|Pirouette|Split|Cartwheel|Breakdance|Headspin|Moon Bounce|Line Dance|Square Dance|Do-Si-Do|Waltz|Tango|Salsa|Swing|Jitterbug|Hokey Pokey|Cupid Shuffle|Electric Slide|Two-Step|Polka|Irish Jig|Stomp|Clap|Shimmy|Shuffle|Wiggle|Jazz Hands|Spin|Twirl|Dip|Leap|Hop|Skip|Slide|Bounce|Sway|Freeze|Air Guitar|Raise the Roof|Penguin Walk|Crab Walk|Duck Walk|Zombie Walk|Slow Motion|Fast Forward|Rewind|Mannequin|Charleston|Cabbage Patch|Sway Arms|Pogo|Headbang|Wave|Snake|Pony|Jumping Jacks|Hip Hop|Tumble|Somersault|Handstand|Beatbox|Rhythm|Groove"
+  },
+  {
+    id: "animal-acts", name: "Animal Charades", emoji: "🐒", group: "Acting", hue: 35,
+    desc: "Act like the animal. No sounds allowed... or maybe just one",
+    items: "Monkey|Gorilla|Elephant|Giraffe|Kangaroo|Penguin|Flamingo|Chicken|Rooster|Duck|Frog|Snake|Crab|Lobster|Octopus|Jellyfish|Shark|Dolphin|Whale|Fish|Seal|Bear|Lion|Tiger|Cat|Dog|Puppy|Horse|Cow|Pig|Sheep|Goat|Bunny|Squirrel|Mouse|Owl|Eagle|Bat|Butterfly|Bee|Mosquito|Spider|Worm|Snail|Turtle|Sloth|Koala|Panda|Camel|Ostrich|Peacock|Turkey|Woodpecker|Hummingbird|T-Rex|Crocodile|Alligator|Hippo|Rhino|Zebra|Llama|Moose|Deer|Skunk|Raccoon|Beaver|Otter|Platypus|Meerkat|Chameleon|Lizard|Gecko|Hamster|Parrot|Pelican|Seagull|Starfish|Caterpillar|Grasshopper|Ant|Ladybug|Scorpion|Walrus|Polar Bear|Wolf|Fox|Hedgehog|Porcupine"
+  },
+  {
+    id: "town", name: "Around Town", emoji: "🏙️", group: "Places", hue: 220,
+    desc: "Places you go and things you see in town",
+    items: "Library|Bakery|Hospital|Fire Station|Police Station|Post Office|Bank|Grocery Store|Gas Station|Car Wash|Pharmacy|Dentist|Doctor's Office|Barber Shop|Hair Salon|Restaurant|Diner|Pizza Place|Coffee Shop|Ice Cream Shop|Bookstore|Toy Store|Pet Store|Shoe Store|Mall|Movie Theater|Bowling Alley|Arcade|Skating Rink|Trampoline Park|Water Park|Zoo|Aquarium|Museum|Playground|Park|Fountain|Statue|Bridge|Train Station|Bus Stop|Airport|Parking Lot|Stoplight|Crosswalk|Stop Sign|Sidewalk|Skyscraper|Elevator|Escalator|Apartment|Hotel|Church|School|City Hall|Courthouse|Stadium|Gym|Swimming Pool|Farmer's Market|Food Truck|Drive-Thru|Laundromat|Hardware Store|Garden Center|Bike Shop|Thrift Store|Flower Shop|Car Dealer|Fair|Circus|Factory|Warehouse|Construction|Taxi|Bus|Subway|Ambulance|Fire Truck|Mail Truck|Garbage Truck|Billboard|Neighborhood|Downtown|Traffic|Tunnel"
+  },
+  {
+    id: "history", name: "History & Heroes", emoji: "🏛️", group: "Smart", hue: 35,
+    desc: "Knights, pharaohs, pioneers, and big moments",
+    items: "Pyramids|Pharaoh|Mummy|Sphinx|Hieroglyphics|Gladiator|Colosseum|Roman Empire|Caesar|Toga|Chariot|Olympics|Knight|Castle|Moat|Drawbridge|King|Queen|Prince|Princess|Jester|Dragon|Armor|Sword|Shield|Catapult|Vikings|Longship|Samurai|Ninja|Great Wall|Explorer|Columbus|Compass|Pirate|Treasure Map|Pilgrims|Colonies|Declaration|Liberty Bell|George Washington|Abraham Lincoln|Statue of Liberty|Pioneer|Covered Wagon|Gold Rush|Cowboy|Railroad|Telegraph|Lighthouse|Inventor|Wright Brothers|Airplane|Model T|Titanic|Moon Landing|Neil Armstrong|Astronaut|Martin Luther King|Rosa Parks|Harriet Tubman|Thomas Edison|Benjamin Franklin|Kite and Key|Light Bulb|Printing Press|Telephone|Revolution|Patriot|Minuteman|Founding Fathers|Constitution|President|Flag|Eagle|Time Capsule|Dinosaur|Caveman|Stone Age|Iron Age|Medieval|Renaissance|Castle Tower|Tournament|Archer"
+  },
+  {
+    id: "colors-shapes", name: "Colors & Shapes", emoji: "🔺", group: "Easy", hue: 0,
+    desc: "Easy wins for little ones",
+    items: "Red|Orange|Yellow|Green|Blue|Purple|Pink|Brown|Black|White|Gray|Gold|Silver|Rainbow|Circle|Square|Triangle|Rectangle|Star|Heart|Oval|Diamond|Moon|Cube|Ball|Cone|Pyramid|Line|Zigzag|Spiral|Dots|Stripes|Polka Dots|Checkers|Arrow|Cross|Hexagon|Octagon|Pentagon|Crescent|Big|Small|Tall|Short|Round|Pointy|Flat|Bumpy|Smooth|Fluffy|Shiny|Sparkly|Glow|Number One|Two|Three|Four|Five|Ten|Hundred|Letter A|Apple|Banana|Grape|Lemon|Tomato|Carrot|Crayon|Paint|Marker|Chalk|Bubble|Balloon|Kite|Block|Puzzle|Box|Wheel|Clock|Sun|Cloud|Snowflake"
+  },
+  {
+    id: "baby-animals", name: "Baby Animals", emoji: "🐥", group: "Easy", hue: 55,
+    desc: "Puppies, kittens, and other little cuties",
+    items: "Puppy|Kitten|Chick|Duckling|Gosling|Bunny|Lamb|Calf|Foal|Piglet|Kid|Cub|Joey|Fawn|Owlet|Eaglet|Tadpole|Caterpillar|Hatchling|Pup|Kit|Baby|Nest|Egg|Crib|Bottle|Blanket|Pacifier|Rattle|Stroller|Teddy|Lullaby|Nap|Cuddle|Snuggle|Hug|Kiss|Giggle|Crawl|Wobble|Waddle|Hop|Peep|Tweet|Purr|Squeak|Woof|Meow|Moo|Oink|Baa|Quack|Neigh|Cluck|Hiss|Roar|Little|Tiny|Fluffy|Fuzzy|Soft|Cute|Sleepy|Hungry|Mama|Papa|Family|Farm|Barn|Pond|Meadow|Burrow|Den|Hive|Pouch|Basket|Ball|Bowl|Milk|Grass|Hay|Carrot|Corn|Bone|Yarn"
+  },
+  {
     id: "easy-kids", name: "Little Kids (Easy)", emoji: "🧃", group: "Easy", hue: 60,
     desc: "Simple words for younger players",
     items: "Dog|Cat|Fish|Bird|Cow|Pig|Horse|Duck|Frog|Bear|Lion|Monkey|Bunny|Elephant|Giraffe|Snake|Turtle|Bee|Butterfly|Spider|Ball|Car|Truck|Bus|Train|Boat|Plane|Bike|Kite|Balloon|Hat|Shoe|Sock|Shirt|Coat|Bed|Chair|Table|Door|Window|Book|Crayon|Cup|Spoon|Fork|Plate|Apple|Banana|Cookie|Cake|Pizza|Ice Cream|Milk|Juice|Egg|Sandwich|Sun|Moon|Star|Rain|Snow|Tree|Flower|Grass|Rock|Mud|Water|Bath|Bubbles|Toothbrush|Teddy Bear|Doll|Blocks|Puzzle|Swing|Slide|Sandbox|Mommy|Daddy|Baby|Grandma|Grandpa|Teacher|Doctor|Firefighter|Police Officer|Clown|Princess|Pirate|Robot|Dinosaur|Dragon|Unicorn|Superhero|Rainbow|Cloud|Clock|Phone|TV|Drum"

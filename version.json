@@ -1,8 +1,8 @@
 {
-  "version": "1.3.0",
-  "notes": "Golden double-point cards, hot streaks, a final-10-seconds rush, end-of-game awards, smarter voice that understands joined words like Hulkbuster, and a bigger Got it button.",
+  "version": "1.4.0",
+  "notes": "Hand waves over the camera (up or down for Got it, side to side to Pass), 24 new categories (60 in all), a One category or Mix choice, NEW badges and quick section buttons on the category screen, and snappier swipes.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.3.0/TiltAndTell-1.3.0.apk",
-    "sha256": "02d614c026ff9d0ea27784f3ef4064eccd008b5eb2932ee996d75bc902949fa8"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.0/TiltAndTell-1.4.0.apk",
+    "sha256": "ea417fa6d16ad3fe624c34d6f1929eba5a9ec2b697ceabcbb5781d3c678638c3"
   }
 }

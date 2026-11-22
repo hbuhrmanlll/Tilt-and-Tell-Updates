@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -24,7 +24,7 @@
   /* ---------------- Settings ---------------- */
   const DEFAULTS = {
     ctlTilt: true, ctlSwipe: true, ctlButtons: true, ctlVoice: false, voiceAnswer: true,
-    tiltFlip: false, swipeSwap: false, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
+    tiltFlip: false, swipeSwap: false, ctlWave: false, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
   };
   const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
   const saveSettings = () => store.set("settings", settings);
@@ -73,7 +73,10 @@
     "ocean": 10, "dinos": 10, "kitchen": 10, "church": 15, "bible-stories": 15, "tv": 15,
     "games": 20, "jobs": 20, "places": 20, "sports": 20, "music": 25, "vehicles": 25, "school": 25, "outdoors": 25,
     "holidays": 30, "christmas": 30, "seasons-weather": 30, "science": 30, "inventions": 35, "toys": 35,
-    "fairy-tales": 35, "fantasy": 35, "body": 40, "states": 40, "impressions": 40, "phrases": 40
+    "fairy-tales": 35, "fantasy": 35, "body": 40, "states": 40, "impressions": 40, "phrases": 40,
+    "breakfast": 10, "bugs-birds": 10, "farm-pets": 10, "plants": 15, "bible-books": 15, "house": 15,
+    "clothes": 20, "summer": 20, "winter": 20, "fall": 20, "spring-easter": 20, "tools": 25, "space": 25, "town": 25,
+    "crafts": 30, "history": 35
   };
   const progress = { stars: Math.max(0, Number(store.get("stars", 0)) || 0), unlocked: new Set(store.get("unlocked", [])) };
   const saveProgress = () => { store.set("stars", progress.stars); store.set("unlocked", Array.from(progress.unlocked)); };
@@ -326,11 +329,12 @@
     Audio.play("tap");
     const list = game.mode === "teams" ? game.teams : game.players;
     list.forEach((n, i) => { if (!String(n).trim()) list[i] = (game.mode === "teams" ? "Team " : "Player ") + (i + 1); });
-    persistSetup(); show("cats");
+    persistSetup(); show("cats"); askPickMode();
   });
 
   /* ---------------- Categories ---------------- */
   const LOCK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const NEW_DECKS = new Set(["fruits-veggies", "sweets", "breakfast", "bugs-birds", "farm-pets", "plants", "bible-books", "faith-words", "house", "clothes", "tools", "superpowers", "space", "summer", "winter", "fall", "spring-easter", "crafts", "dances", "animal-acts", "town", "history", "colors-shapes", "baby-animals"]);
   const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   function renderCats() {
     const q = $("#cat-search").value.trim().toLowerCase();
@@ -344,16 +348,18 @@
     $("#cat-oneword-note").hidden = !hiddenPhrases;
     const cats = allCats().filter(isVisible).filter(c => !q || c.name.toLowerCase().includes(q) || (c.desc || "").toLowerCase().includes(q));
     const groups = ["Mine"].concat(GROUP_ORDER);
-    let shown = 0;
+    let shown = 0; const jumps = [];
     groups.forEach(g => {
       const inGroup = cats.filter(c => c.group === g); if (!inGroup.length) return;
-      const h = document.createElement("h3"); h.className = "cat-group-title"; h.textContent = GROUP_LABEL[g] || g; list.appendChild(h);
+      const h = document.createElement("h3"); h.className = "cat-group-title"; h.textContent = GROUP_LABEL[g] || g; h.id = "grp-" + g.replace(/\W+/g, "-"); list.appendChild(h);
+      jumps.push([g, h.id]);
       const grid = document.createElement("div"); grid.className = "cat-grid";
       inGroup.forEach(c => {
         const b = document.createElement("button"); b.className = "cat-tile"; b.style.setProperty("--h", c.hue);
         const locked = !isUnlocked(c), n = itemsFor(c).length;
         b.setAttribute("aria-pressed", String(game.cats.has(c.id)));
         if (locked) b.classList.add("is-locked");
+        if (NEW_DECKS.has(c.id)) { const nw = document.createElement("span"); nw.className = "cat-new"; nw.textContent = "NEW"; b.append(nw); }
         b.setAttribute("aria-label", locked ? `${c.name}, locked, ${costOf(c)} stars to unlock` : `${c.name}, ${n} words`);
         const em = document.createElement("span"); em.className = "cat-emoji"; em.textContent = c.emoji; em.setAttribute("aria-hidden", "true");
         const wrap = document.createElement("span");
@@ -366,6 +372,7 @@
         b.addEventListener("click", () => {
           Audio.play("tap");
           if (!isUnlocked(c)) { askUnlock(c); return; }
+          if (pickMode === "one") { pickOne(c, b); return; }
           if (game.cats.has(c.id)) game.cats.delete(c.id); else game.cats.add(c.id);
           b.setAttribute("aria-pressed", String(game.cats.has(c.id))); store.set("cats", Array.from(game.cats)); updateCatsGo();
         });
@@ -374,6 +381,14 @@
       list.appendChild(grid);
     });
     $("#cat-empty").hidden = shown > 0;
+    // Jump chips: one tap to a section, since there are lots of decks now
+    const jb = $("#cat-jumps"); jb.textContent = "";
+    if (!q && jumps.length > 2) jumps.forEach(([g, id]) => {
+      const j = document.createElement("button"); j.textContent = GROUP_LABEL[g] || g;
+      j.addEventListener("click", () => { Audio.play("tap"); const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); });
+      jb.appendChild(j);
+    });
+    jb.hidden = !jb.children.length;
     updateCatsGo();
   }
   function askUnlock(c) {
@@ -393,19 +408,44 @@
       ]);
     }
   }
+  /* One deck or a mix? Asked each time you get to the category screen. */
+  let pickMode = store.get("pickMode", "one");
+  function syncPickUi() {
+    setChecked("pick-chips", "data-pick", pickMode);
+    $("#cats-title").textContent = pickMode === "one" ? "Pick a category" : "Pick categories";
+    $("#screen-cats").classList.toggle("is-one", pickMode === "one");
+  }
+  function setPickMode(m) {
+    pickMode = m === "mix" ? "mix" : "one"; store.set("pickMode", pickMode);
+    if (pickMode === "one" && game.cats.size > 1) { game.cats.clear(); store.set("cats", []); }
+    syncPickUi(); renderCats();
+  }
+  function askPickMode() {
+    modal("How do you want to play?", "Play one category, or mix a few together for a wild round.", [
+      { label: "🎯 One category", kind: "btn-primary", fn: () => setPickMode("one") },
+      { label: "🎲 Mix several", kind: "btn-ghost", fn: () => setPickMode("mix") }
+    ]);
+  }
+  function pickOne(c, b) {
+    game.cats.clear(); game.cats.add(c.id); store.set("cats", [c.id]);
+    $$("#cat-list .cat-tile").forEach(t => t.setAttribute("aria-pressed", "false"));
+    b.setAttribute("aria-pressed", "true"); b.classList.add("is-chosen"); buzz(25);
+    setTimeout(() => { b.classList.toggle("is-chosen", false); if (current === "cats") startGame(); }, 380);
+  }
+  $("#pick-chips").addEventListener("click", e => { const x = e.target.closest("[data-pick]"); if (!x) return; Audio.play("tap"); setPickMode(x.dataset.pick); });
   function updateCatsGo() {
     const n = game.cats.size, btn = $("#cats-go");
     const words = Array.from(game.cats).reduce((s, id) => { const c = catById(id); return s + (c ? itemsFor(c).length : 0); }, 0);
     btn.disabled = n === 0;
     btn.textContent = n === 0 ? "Pick at least one" : n === 1 ? `Play ${catById(Array.from(game.cats)[0]).name}` : `Play ${n} categories (${words} words)`;
   }
-  onShow.cats = renderCats;
+  onShow.cats = () => { syncPickUi(); renderCats(); };
   $("#cat-search").addEventListener("input", renderCats);
   $("#cats-surprise").addEventListener("click", () => {
     Audio.play("tap"); game.cats.clear();
-    const pool = shuffle(BUILT_IN.filter(c => c.group !== "Easy" && playable(c)).slice()); pool.slice(0, 3).forEach(c => game.cats.add(c.id));
+    const pool = shuffle(BUILT_IN.filter(c => c.group !== "Easy" && playable(c)).slice()); const k = pickMode === "one" ? 1 : 3; pool.slice(0, k).forEach(c => game.cats.add(c.id));
     store.set("cats", Array.from(game.cats)); $("#cat-search").value = ""; renderCats();
-    toast("Picked: " + pool.slice(0, 3).map(c => c.name).join(", "));
+    toast("Picked: " + pool.slice(0, k).map(c => c.name).join(", "));
   });
   $("#cats-go").addEventListener("click", () => { if (!game.cats.size) return; Audio.play("tap"); startGame(); });
 
@@ -438,7 +478,9 @@
     const tips = [];
     if (game.mode === "teams") tips.push(`One person from ${p.name} holds the phone on their forehead, screen facing out.`);
     else tips.push("Hold the phone sideways on your forehead, screen facing out.");
-    $("#ready-tip").textContent = tips[0];
+    let tip = tips[0];
+    if (settings.ctlWave && Wave.supported) tip += ` Wave a hand across the camera: ${settings.swipeSwap ? "side to side for Got it, up or down to Pass" : "up or down for Got it, side to side to Pass"}.`;
+    $("#ready-tip").textContent = tip;
     show("ready", { push: false });
   }
   $("#ready-quit").addEventListener("click", confirmQuit);
@@ -504,7 +546,7 @@
     const wait = $("#play-wait"); wait.classList.add("show");
     $("#pw-count").textContent = ""; $("#pw-start").hidden = false;
     $("#pw-msg").textContent = motionOK ? "Put the phone on your forehead" : "Tap Start when the phone is on your forehead";
-    Tilt.start();
+    Tilt.start(); Wave.start();
     checkRotateHint();
   }
   $("#pw-start").addEventListener("click", () => { Audio.ensure(); startCountdown(); });
@@ -637,7 +679,7 @@
 
   function timeUp() {
     if (!turn.running) return;
-    turn.running = false; clearInterval(turn.timer); Voice.stop(); Tilt.stop();
+    turn.running = false; clearInterval(turn.timer); Voice.stop(); Tilt.stop(); Wave.stop();
     turn.left = 0; updateTimer(); $("#play-stage").classList.remove("is-hurry");
     // the word on screen when time ran out counts as a pass only if it was never answered
     const ov = $("#play-overlay"); ov.className = "play-overlay show time";
@@ -648,17 +690,17 @@
 
   function pauseTurn() {
     if (!turn.running || turn.paused) return;
-    turn.paused = true; turn.left = Math.max(0, (turn.endAt - performance.now()) / 1000); Voice.stop();
+    turn.paused = true; turn.left = Math.max(0, (turn.endAt - performance.now()) / 1000); Voice.stop(); Wave.stop();
     modal("Paused", `${Math.ceil(turn.left)} seconds left.`, [
       { label: "Resume", kind: "btn-primary", fn: resumeTurn },
       { label: "End this turn", kind: "btn-ghost", fn: () => { turn.paused = false; turn.endAt = performance.now(); tickTimer(); } },
       { label: "Quit game", kind: "btn-danger", fn: () => { endPlaySession(); history.length = 0; show("home", { push: false }); } }
     ]);
   }
-  function resumeTurn() { turn.paused = false; turn.endAt = performance.now() + turn.left * 1000; turn.wordShownAt = performance.now(); Voice.start(); }
+  function resumeTurn() { turn.paused = false; turn.endAt = performance.now() + turn.left * 1000; turn.wordShownAt = performance.now(); Voice.start(); Wave.start(); }
   function endPlaySession() {
     turn.running = false; turn.paused = false; clearInterval(turn.timer); clearTimeout(turn.waitTimer); turn.countingDown = false;
-    Voice.stop(); Tilt.stop(); exitFullscreen(); releaseAwake(); $("#play-wait").classList.remove("show"); $("#play-overlay").className = "play-overlay";
+    Voice.stop(); Tilt.stop(); Wave.stop(); exitFullscreen(); releaseAwake(); $("#play-wait").classList.remove("show"); $("#play-overlay").className = "play-overlay";
     $("#rotate-hint").classList.remove("show");
   }
   $("#play-pause").addEventListener("click", e => { e.stopPropagation(); Audio.play("tap"); pauseTurn(); });
@@ -676,16 +718,26 @@
 
   /* Swipe */
   (function swipe() {
-    const stage = $("#play-stage"); let sx = 0, sy = 0, st = 0, active = false;
-    stage.addEventListener("pointerdown", e => { if (e.target.closest("button")) return; active = true; sx = e.clientX; sy = e.clientY; st = performance.now(); });
-    stage.addEventListener("pointerup", e => {
-      if (!active) return; active = false; if (!settings.ctlSwipe) return;
-      const dx = e.clientX - sx, dy = e.clientY - sy, dt = performance.now() - st;
-      const dist = Math.hypot(dx, dy); if (dist < 50 || dt > 900) return;
+    // Fires as soon as the finger has moved far enough, so a quick flick counts even if the
+    // phone cancels the touch before the finger lifts.
+    const stage = $("#play-stage"); let sx = 0, sy = 0, st = 0, active = false, pid = null;
+    function check(x, y, final) {
+      if (!active) return;
+      const dx = x - sx, dy = y - sy, dt = performance.now() - st, dist = Math.hypot(dx, dy);
+      if (dt > 1200) { active = false; return; }
+      if (dist < (final ? 40 : 70)) { if (final) active = false; return; }
+      active = false; if (!settings.ctlSwipe) return;
       const vertical = Math.abs(dy) > Math.abs(dx);
       score(vertical !== settings.swipeSwap ? "got" : "pass", "swipe");
+    }
+    stage.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
+      active = true; pid = e.pointerId; sx = e.clientX; sy = e.clientY; st = performance.now();
+      try { stage.setPointerCapture(e.pointerId); } catch (err) {}
     });
-    stage.addEventListener("pointercancel", () => { active = false; });
+    stage.addEventListener("pointermove", e => { if (e.pointerId === pid) check(e.clientX, e.clientY, false); });
+    stage.addEventListener("pointerup", e => { if (e.pointerId === pid) check(e.clientX, e.clientY, true); });
+    stage.addEventListener("pointercancel", e => { if (e.pointerId === pid) check(e.clientX, e.clientY, true); });
   })();
 
   /* Keyboard (handy on a laptop or with a Bluetooth remote) */
@@ -736,6 +788,97 @@
       arm() { armed = lastUp !== null && Math.abs(lastUp) < 0.32; },
       get lastUp() { return lastUp; }
     };
+  })();
+
+  /* ---------------- Hand wave (front camera) ----------------
+     With the phone on your forehead, wave a hand across the front camera.
+     Up or down = Got it, side to side = Pass (or flipped with the swipe/wave flip switch).
+     The camera picture is shrunk to a tiny 48 x 36 grid and compared frame to frame on the phone.
+     Nothing is shown, saved or sent anywhere. The camera is only on while you're playing. */
+  const Wave = (() => {
+    let stream = null, video = null, cv = null, ctx = null, loop = 0, prev = null, track = [], hold = 0, starting = false, warned = false;
+    const supported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    function stopTracks() { if (stream) stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); stream = null; }
+    function chip(state) { const c = $("#hud-wave"); if (!c) return; c.hidden = !state; c.classList.toggle("hit", state === "hit"); }
+    async function start() {
+      if (!settings.ctlWave || stream || starting) { if (stream) chip(true); return; }
+      if (!supported) { if (!warned) { warned = true; toast("This device can't use the camera for hand waves."); } return; }
+      starting = true;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 }, frameRate: { ideal: 20 } } });
+      } catch (e) {
+        starting = false; stream = null;
+        if (!warned) { warned = true; toast("Hand waves are off. Camera access wasn't allowed."); }
+        return;
+      }
+      starting = false;
+      if (current !== "play" || !settings.ctlWave) { stopTracks(); return; }
+      video = document.createElement("video"); video.muted = true; video.playsInline = true; video.setAttribute("playsinline", "");
+      video.srcObject = stream;
+      try { await video.play(); } catch (e) {}
+      cv = document.createElement("canvas"); ctx = cv.getContext("2d", { willReadFrequently: true });
+      prev = null; track = []; hold = 0;
+      clearInterval(loop); loop = setInterval(frame, 50);
+      chip(true);
+    }
+    function stop() {
+      clearInterval(loop); loop = 0; stopTracks();
+      if (video) { try { video.pause(); video.srcObject = null; } catch (e) {} } video = null; prev = null; track = [];
+      chip(false);
+    }
+    function frame() {
+      if (!video || video.readyState < 2) return;
+      const vw = video.videoWidth, vh = video.videoHeight; if (!vw || !vh) return;
+      const w = vw >= vh ? 48 : 36, h = vw >= vh ? 36 : 48;
+      if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; prev = null; }
+      ctx.drawImage(video, 0, 0, w, h);
+      const px = ctx.getImageData(0, 0, w, h).data, n = w * h, g = new Float32Array(n);
+      let mean = 0;
+      for (let i = 0; i < n; i++) { const v = px[i * 4] * 0.3 + px[i * 4 + 1] * 0.59 + px[i * 4 + 2] * 0.11; g[i] = v; mean += v; }
+      mean /= n;
+      for (let i = 0; i < n; i++) g[i] -= mean; // ignore the camera brightening or darkening the whole picture
+      const last = prev; prev = g;
+      if (!last) return;
+      const now = performance.now();
+      if (!turn.running || turn.paused || turn.lock || now < hold) { track = []; return; }
+      // Moving pixels: big change since the last frame
+      let cnt = 0, sx = 0, sy = 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        if (Math.abs(g[i] - last[i]) > 28) { cnt++; sx += x; sy += y; }
+      }
+      const frac = cnt / n;
+      // Almost the whole picture changed: the phone itself moved (a tilt or a bump), not a hand
+      if (frac > 0.6) { track = []; hold = now + 350; return; }
+      // The phone is tilted (someone is using tilt right now): stay out of the way
+      const up = Tilt.lastUp; if (up !== null && Math.abs(up) > 0.45) { track = []; return; }
+      if (frac > 0.025) {
+        // Screen is sideways but the camera picture is upright (or the other way round): swap the axes
+        const swap = (vw < vh) !== (window.innerWidth < window.innerHeight);
+        let cx = sx / cnt / w, cy = sy / cnt / h; if (swap) { const t = cx; cx = cy; cy = t; }
+        track.push({ t: now, cx, cy });
+        if (now - track[0].t > 1100) track.shift();
+        decide(false);
+      } else if (track.length) decide(true);
+    }
+    function decide(ended) {
+      if (track.length < 3) { if (ended) track = []; return; }
+      let minX = 1, maxX = 0, minY = 1, maxY = 0;
+      track.forEach(p => { minX = Math.min(minX, p.cx); maxX = Math.max(maxX, p.cx); minY = Math.min(minY, p.cy); maxY = Math.max(maxY, p.cy); });
+      const a = track[0], b = track[track.length - 1];
+      const dx = Math.abs(b.cx - a.cx), dy = Math.abs(b.cy - a.cy);
+      const spanX = maxX - minX, spanY = maxY - minY;
+      const need = ended ? 0.28 : 0.42; // fire early on a big sweep, otherwise when the hand leaves
+      let dir = null;
+      if (Math.max(dy, spanY * 0.8) > need && dy > dx * 1.4) dir = "vertical";
+      else if (Math.max(dx, spanX * 0.8) > need && dx > dy * 1.4) dir = "side";
+      if (dir) {
+        track = []; hold = performance.now() + 900;
+        const c = $("#hud-wave"); if (c) { c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); }
+        score((dir === "vertical") !== settings.swipeSwap ? "got" : "pass", "wave");
+      } else if (ended) track = [];
+    }
+    return { start, stop, get supported() { return supported; }, get on() { return !!stream; } };
   })();
 
   /* ---------------- Voice ---------------- */
@@ -880,7 +1023,7 @@
     if (game.mode === "quick") {
       modal(`You scored ${got}!`, "Play another quick round?", [
         { label: "Play again", kind: "btn-primary", fn: () => { game.turn = 0; showReady(); } },
-        { label: "Change categories", kind: "btn-ghost", fn: () => { history.length = 0; history.push("home"); show("cats", { push: false }); } },
+        { label: "Change categories", kind: "btn-ghost", fn: () => { history.length = 0; history.push("home"); show("cats", { push: false }); askPickMode(); } },
         { label: "Back to home", kind: "btn-ghost", fn: () => { history.length = 0; show("home", { push: false }); } }
       ]);
       return;
@@ -996,16 +1139,23 @@
     const vs = $("#voice-support");
     if (!Voice.supported) { vs.textContent = "This browser doesn't support voice. Try Chrome on Android or Safari on iPhone."; $('[data-set="ctlVoice"]').disabled = true; }
     $('[data-set="voiceAnswer"]').disabled = !settings.ctlVoice;
+    if (!Wave.supported) { $("#wave-support").textContent = "This device can't use the camera for hand waves."; $('[data-set="ctlWave"]').disabled = true; }
   }
   onShow.settings = renderSettings;
   $$("[data-set]").forEach(el => {
     el.addEventListener(el.type === "range" ? "input" : "change", () => {
       const k = el.dataset.set;
       settings[k] = el.type === "checkbox" ? el.checked : Number(el.value);
-      if (k === "ctlTilt" || k === "ctlSwipe" || k === "ctlButtons") {
-        if (!settings.ctlTilt && !settings.ctlSwipe && !settings.ctlButtons && !settings.ctlVoice) { settings.ctlButtons = true; toast("Kept the on-screen buttons on so you can still play."); }
+      if (k === "ctlTilt" || k === "ctlSwipe" || k === "ctlButtons" || k === "ctlWave") {
+        if (!settings.ctlTilt && !settings.ctlSwipe && !settings.ctlButtons && !settings.ctlVoice && !settings.ctlWave) { settings.ctlButtons = true; toast("Kept the on-screen buttons on so you can still play."); }
       }
       saveSettings(); Audio.applyVolumes();
+      if (k === "ctlWave" && settings.ctlWave && Wave.supported) {
+        // Ask for the camera now, not in the middle of a turn
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
+          .then(st => { st.getTracks().forEach(t => t.stop()); toast("Hand waves are on. Wave across the camera while you play."); })
+          .catch(() => { settings.ctlWave = false; saveSettings(); renderSettings(); toast("Camera access wasn't allowed, so hand waves stay off."); });
+      }
       if (k === "mute" || k === "musicVol") { if (settings.mute || !settings.musicVol) Audio.stopMusic(); else Audio.startMusic(); }
       if (k === "sfxVol" && el.type === "range") Audio.play("tap");
       renderSettings();
