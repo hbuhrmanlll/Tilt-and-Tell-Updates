@@ -181,17 +181,20 @@
         <button class="hud-btn" id="play-pause" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
         <div class="hud-cat" id="play-cat"></div>
         <div class="hud-right">
+          <span class="hud-streak" id="hud-streak" hidden aria-label="Streak"></span>
           <span class="hud-mic" id="hud-mic" hidden aria-label="Listening">🎤</span>
           <span class="hud-score" id="play-score" aria-label="Score">0</span>
           <div class="hud-timer" id="play-timer" role="timer" aria-live="off"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t-track" cx="22" cy="22" r="19"/><circle class="t-fill" id="timer-ring" cx="22" cy="22" r="19"/></svg><span id="timer-num">60</span></div>
         </div>
       </div>
-      <div class="play-word-wrap"><div class="play-word" id="play-word" aria-live="polite"></div></div>
+      <div class="play-emoji" id="play-emoji" aria-hidden="true"></div>
+      <div class="play-word-wrap"><div class="play-golden" id="play-golden" hidden>★ Double points</div><div class="play-word" id="play-word" aria-live="polite"></div></div>
       <div class="play-buttons" id="play-buttons">
         <button class="pbtn pbtn-pass" id="btn-pass">Pass</button>
         <button class="pbtn pbtn-got" id="btn-got">Got it</button>
       </div>
       <div class="play-overlay" id="play-overlay" aria-hidden="true">
+        <div class="po-burst" id="po-burst"></div>
         <div class="po-big" id="po-big"></div>
         <div class="po-small" id="po-small"></div>
       </div>
@@ -210,6 +213,7 @@
     <div class="res-head">
       <p class="res-kicker" id="res-kicker">Time's up</p>
       <h2 class="res-title" id="res-title"><span id="res-score">0</span> <span class="res-unit" id="res-unit">correct</span></h2>
+      <div class="res-stats" id="res-stats" hidden></div>
       <p class="res-hint">Tap a word to fix it.</p>
     </div>
     <div class="scroll">
@@ -245,6 +249,7 @@
       <p class="win-kicker">And the winner is</p>
       <h2 class="win-title" id="win-title">Player</h2>
       <p class="win-score" id="win-score"></p>
+      <div class="awards" id="win-awards" hidden></div>
       <ol class="board board-final" id="win-list"></ol>
     </div>
     <div class="dock">
@@ -265,6 +270,7 @@
       <div class="list">
         <label class="row"><span><strong>Tilt</strong><small>Tilt down for got it, up to pass</small></span><input type="checkbox" class="switch" data-set="ctlTilt"></label>
         <label class="row"><span><strong>Swipe</strong><small>Up or down got it, left or right pass</small></span><input type="checkbox" class="switch" data-set="ctlSwipe"></label>
+        <label class="row"><span><strong>Flip swipe directions</strong><small>Left or right got it, up or down pass</small></span><input type="checkbox" class="switch" data-set="swipeSwap"></label>
         <label class="row"><span><strong>On-screen buttons</strong><small>Big Pass and Got it buttons</small></span><input type="checkbox" class="switch" data-set="ctlButtons"></label>
         <label class="row"><span><strong>Voice</strong><small id="voice-support">Say “got it” or “pass”</small></span><input type="checkbox" class="switch" data-set="ctlVoice"></label>
         <label class="row"><span><strong>Say the answer to score</strong><small>Counts it when the mic hears the word</small></span><input type="checkbox" class="switch" data-set="voiceAnswer"></label>
@@ -286,6 +292,7 @@
       </div>
       <h3 class="sub">Words</h3>
       <div class="list">
+        <label class="row"><span><strong>Golden cards</strong><small>Now and then a gold card shows up worth double points</small></span><input type="checkbox" class="switch" data-set="golden"></label>
         <label class="row"><span><strong>One word per card</strong><small>Turn off to also get longer cards like “Statue of Liberty”</small></span><input type="checkbox" class="switch" data-set="oneWord"></label>
         <button class="row row-btn" id="unlock-all"><span><strong>Unlock all decks</strong><small>For leaders running a big game night</small></span></button>
         <button class="row row-btn" id="reset-history"><span><strong>Reset word history</strong><small>The game avoids repeats until every word in a category has shown up. This starts it over.</small></span></button>

@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -24,7 +24,7 @@
   /* ---------------- Settings ---------------- */
   const DEFAULTS = {
     ctlTilt: true, ctlSwipe: true, ctlButtons: true, ctlVoice: false, voiceAnswer: true,
-    tiltFlip: false, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
+    tiltFlip: false, swipeSwap: false, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
   };
   const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
   const saveSettings = () => store.set("settings", settings);
@@ -144,7 +144,14 @@
     }
     const sfx = {
       tap() { const t = ctx.currentTime; tone(880, t, 0.06, { type: "triangle", vol: 0.12 }); },
-      correct() { const t = ctx.currentTime; tone(784, t, 0.12, { type: "triangle", vol: 0.32 }); tone(1175, t + 0.08, 0.22, { type: "triangle", vol: 0.32 }); tone(1568, t + 0.16, 0.28, { type: "sine", vol: 0.18 }); },
+      correct(streak) {
+        // each answer in a streak rings a little higher
+        const t = ctx.currentTime, k = Math.pow(2, Math.min(streak || 0, 8) / 24);
+        tone(784 * k, t, 0.12, { type: "triangle", vol: 0.32 }); tone(1175 * k, t + 0.08, 0.22, { type: "triangle", vol: 0.32 }); tone(1568 * k, t + 0.16, 0.28, { type: "sine", vol: 0.18 });
+      },
+      golden() { const t = ctx.currentTime; [1047, 1319, 1568, 2093, 2637].forEach((f, i) => tone(f, t + i * 0.05, 0.3, { type: "sine", vol: 0.16 })); noise(t + 0.1, 0.25, 0.05, 6000); },
+      streak() { const t = ctx.currentTime; tone(523, t, 0.1, { type: "square", vol: 0.1, filter: 2400 }); tone(784, t + 0.07, 0.1, { type: "square", vol: 0.1, filter: 2400 }); tone(1047, t + 0.14, 0.22, { type: "square", vol: 0.12, filter: 2400 }); },
+
       pass() { const t = ctx.currentTime; tone(330, t, 0.28, { type: "sawtooth", vol: 0.18, slideTo: 196, filter: 1400 }); },
       tick(urgent) { const t = ctx.currentTime; tone(urgent ? 1400 : 1000, t, 0.05, { type: "square", vol: urgent ? 0.1 : 0.06, filter: 3000 }); noise(t, 0.02, 0.05, 4000); },
       count(n) { const t = ctx.currentTime; tone(n > 0 ? 660 : 990, t, n > 0 ? 0.16 : 0.4, { type: "triangle", vol: 0.3 }); if (n === 0) tone(1320, t, 0.4, { type: "sine", vol: 0.15 }); },
@@ -445,7 +452,7 @@
   }
 
   /* ---------------- Turn ---------------- */
-  const turn = { deck: [], idx: 0, results: [], left: 0, running: false, paused: false, lock: false, timer: null, endAt: 0, wordShownAt: 0, waitTimer: null };
+  const turn = { deck: [], idx: 0, results: [], left: 0, running: false, paused: false, lock: false, timer: null, endAt: 0, wordShownAt: 0, waitTimer: null, streak: 0, lastOutcome: "" };
 
   async function requestMotion() {
     if (!settings.ctlTilt) return false;
@@ -480,7 +487,9 @@
 
   function beginTurn() {
     turn.deck = buildDeck(Array.from(game.cats));
-    turn.idx = 0; turn.results = []; turn.left = game.time; turn.running = false; turn.paused = false; turn.lock = true;
+    turn.idx = 0; turn.results = []; turn.left = game.time; turn.running = false; turn.paused = false; turn.lock = true; turn.streak = 0; turn.lastOutcome = "";
+    turn.deck.forEach(d => { d.golden = false; });
+    $("#hud-streak").hidden = true; $("#play-stage").classList.remove("is-hurry", "is-golden");
     const p = currentPlayer();
     $("#screen-play").style.setProperty("--ph", 265);
     $("#play-stage").style.setProperty("--ph", 265);
@@ -536,6 +545,7 @@
     const frac = game.time ? turn.left / game.time : 0;
     $("#timer-ring").style.strokeDashoffset = String(119.4 * (1 - frac));
     $("#play-timer").classList.toggle("is-low", whole <= 10);
+    $("#play-stage").classList.toggle("is-hurry", turn.running && whole <= 10 && whole > 0);
   }
 
   function nextWord() {
@@ -546,7 +556,17 @@
     $("#play-stage").style.setProperty("--ph", hue);
     $("#play-wait").style.setProperty("--ph", hue);
     $("#play-cat").textContent = (game.mode === "quick" ? "" : currentPlayer().name + " · ") + item.cat.name;
-    const w = $("#play-word"); w.textContent = item.word; w.classList.remove("pop"); void w.offsetWidth; w.classList.add("pop");
+    // About one card in seven is a golden card worth double (never the first card)
+    item.golden = !!(settings.golden && turn.idx > 0 && randInt(7) === 0);
+    $("#play-stage").classList.toggle("is-golden", item.golden);
+    $("#play-golden").hidden = !item.golden;
+    $("#play-emoji").textContent = item.cat.emoji || "";
+    $("#play-stage").scrollTop = 0;
+    const w = $("#play-word"); w.textContent = item.word;
+    w.classList.remove("pop", "pop-up", "pop-side"); void w.offsetWidth;
+    w.classList.add(turn.lastOutcome === "got" ? "pop-up" : turn.lastOutcome === "pass" ? "pop-side" : "pop");
+    if (item.golden) Audio.play("golden");
+    if (APP && APP.setSpeechHint) { try { APP.setSpeechHint(item.word); } catch (e) {} }
     fitWord();
     turn.wordShownAt = performance.now();
     Voice.resetWindow();
@@ -565,22 +585,49 @@
     $("#rotate-hint").classList.toggle("show", current === "play" && portrait && window.innerWidth < 600);
   }
 
+  /* Points: golden cards count double */
+  const pointsOf = r => r.got ? (r.golden ? 2 : 1) : 0;
+  const turnPoints = list => list.reduce((n, r) => n + pointsOf(r), 0);
+  /* Little burst of sparks behind "Got it!" */
+  function burst(gold) {
+    const box = $("#po-burst"); box.textContent = "";
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const n = gold ? 16 : 10;
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement("i"), a = (i / n) * Math.PI * 2 + Math.random() * 0.4, r = 120 + Math.random() * 120;
+      d.style.setProperty("--dx", Math.cos(a) * r + "px"); d.style.setProperty("--dy", Math.sin(a) * r + "px");
+      d.style.setProperty("--s", (0.6 + Math.random() * 0.8).toFixed(2));
+      box.appendChild(d);
+    }
+  }
+  /* Stats for one turn's results */
+  function turnStats(list) {
+    let best = 0, run = 0, fastest = null, golden = 0;
+    list.forEach(r => { if (r.got) { run++; best = Math.max(best, run); if (r.ms && (fastest === null || r.ms < fastest)) fastest = r.ms; if (r.golden) golden++; } else run = 0; });
+    return { points: turnPoints(list), got: list.filter(r => r.got).length, passes: list.filter(r => !r.got).length, seen: list.length, best, fastest, golden };
+  }
+
   /* outcome: "got" or "pass"; source used for feedback text */
   function score(outcome, source) {
     if (!turn.running || turn.paused || turn.lock) return;
     if (source !== "button" && source !== "key" && performance.now() - turn.wordShownAt < 250) return; // ignore accidental double triggers
     turn.lock = true;
-    const item = turn.deck[turn.idx];
-    turn.results.push({ word: item.word, cat: item.cat, got: outcome === "got" });
+    const item = turn.deck[turn.idx], isGot = outcome === "got";
+    turn.results.push({ word: item.word, cat: item.cat, got: isGot, golden: !!item.golden, ms: Math.round(performance.now() - turn.wordShownAt) });
     markSeen(item.cat, item.word);
-    const got = turn.results.filter(r => r.got).length;
-    $("#play-score").textContent = String(got);
+    turn.streak = isGot ? turn.streak + 1 : 0; turn.lastOutcome = outcome;
+    $("#play-score").textContent = String(turnPoints(turn.results));
+    const chip = $("#hud-streak"); chip.hidden = turn.streak < 3; chip.textContent = `🔥 ${turn.streak}`;
     const ov = $("#play-overlay");
-    ov.className = "play-overlay show " + (outcome === "got" ? "good" : "bad");
-    $("#po-big").textContent = outcome === "got" ? "Got it!" : "Pass";
-    $("#po-small").textContent = item.word + (source === "voice-answer" ? " (heard it)" : "");
-    Audio.play(outcome === "got" ? "correct" : "pass");
-    buzz(outcome === "got" ? 35 : 70);
+    ov.className = "play-overlay show " + (isGot ? (item.golden ? "good gold" : "good") : "bad");
+    $("#po-big").textContent = isGot ? (item.golden ? "Double!" : "Got it!") : "Pass";
+    let small = item.word + (source === "voice-answer" ? " (heard it)" : "");
+    if (isGot && turn.streak >= 3) small += ` · 🔥 ${turn.streak} in a row`;
+    $("#po-small").textContent = small;
+    if (isGot) burst(item.golden);
+    Audio.play(isGot ? "correct" : "pass", turn.streak);
+    if (isGot && turn.streak > 0 && turn.streak % 5 === 0) Audio.play("streak");
+    buzz(isGot ? (item.golden ? [30, 40, 30] : 35) : 70);
     setTimeout(() => {
       ov.className = "play-overlay";
       if (!turn.running) return;
@@ -591,7 +638,7 @@
   function timeUp() {
     if (!turn.running) return;
     turn.running = false; clearInterval(turn.timer); Voice.stop(); Tilt.stop();
-    turn.left = 0; updateTimer();
+    turn.left = 0; updateTimer(); $("#play-stage").classList.remove("is-hurry");
     // the word on screen when time ran out counts as a pass only if it was never answered
     const ov = $("#play-overlay"); ov.className = "play-overlay show time";
     $("#po-big").textContent = "Time's up!"; $("#po-small").textContent = "Flip the phone over to see how you did";
@@ -635,7 +682,8 @@
       if (!active) return; active = false; if (!settings.ctlSwipe) return;
       const dx = e.clientX - sx, dy = e.clientY - sy, dt = performance.now() - st;
       const dist = Math.hypot(dx, dy); if (dist < 50 || dt > 900) return;
-      if (Math.abs(dy) > Math.abs(dx)) score("got", "swipe"); else score("pass", "swipe");
+      const vertical = Math.abs(dy) > Math.abs(dx);
+      score(vertical !== settings.swipeSwap ? "got" : "pass", "swipe");
     });
     stage.addEventListener("pointercancel", () => { active = false; });
   })();
@@ -699,13 +747,37 @@
     const STOP = new Set(["the", "a", "an", "of", "and", "to", "in", "on", "at", "your", "my", "for", "with"]);
     const GOT = /\b(got it|gotcha|got that|i got it|we got it|correct|that's it|thats it)\b/;
     const PASS = /\b(pass|skip|next one)\b/;
+    // Edit distance, so "hulk buster", "hulkbusters" or a near-miss like "hulkbustor" still count
+    function lev(a, b) {
+      if (a === b) return 0; if (!a.length) return b.length; if (!b.length) return a.length;
+      let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = cur;
+      }
+      return prev[b.length];
+    }
+    // Short words must match exactly; longer words may be off by one (6+ letters) or two (9+ letters)
+    function close(heardWord, target) {
+      if (heardWord === target || heardWord === target + "s" || heardWord + "s" === target || heardWord === target + "es") return true;
+      const L = target.length; if (L < 6) return false;
+      return Math.abs(heardWord.length - L) <= 2 && lev(heardWord, target) <= (L >= 9 ? 2 : 1);
+    }
     function answerHeard(text) {
       if (!settings.voiceAnswer) return false;
       const item = turn.deck[turn.idx]; if (!item) return false;
       const words = norm(item.word).split(" ").filter(w => w && !STOP.has(w));
       if (!words.length) return false;
-      const heard = " " + text + " ";
-      return words.every(w => heard.includes(" " + w + " ") || heard.includes(" " + w + "s ") || (w.endsWith("s") && heard.includes(" " + w.slice(0, -1) + " ")));
+      const toks = text.split(" ").filter(Boolean);
+      // 1) joined: "hulk buster" -> "hulkbuster", "t rex" -> "trex", "spider man" -> "spiderman"
+      const target = words.join("");
+      for (let i = 0; i < toks.length; i++) {
+        let joined = "";
+        for (let n = 0; n < 4 && i + n < toks.length; n++) { joined += toks[i + n]; if (close(joined, target)) return true; }
+      }
+      // 2) every word of a multi-word answer heard somewhere
+      return words.length > 1 && words.every(w => toks.some(t => close(t, w)));
     }
     function onResult(e) {
       let latest = "";
@@ -758,17 +830,33 @@
   const MARK_BAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7 7 17M7 7l10 10"/></svg>';
   function showResults() {
     releaseAwake(); $("#rotate-hint").classList.remove("show");
-    renderResults();
+    renderResults(true);
     const last = game.mode === "quick" || game.turn + 1 >= game.totalTurns;
     $("#res-next").textContent = game.mode === "quick" ? "Done" : last ? "See who won" : "Save and continue";
     $("#res-kicker").textContent = game.mode === "quick" ? "Time's up" : `${currentPlayer().name}`;
     show("results", { push: false });
   }
-  function renderResults() {
+  function countUp(el, to) {
+    const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || to <= 0) { el.textContent = String(to); return; }
+    const t0 = performance.now(), dur = Math.min(900, 250 + to * 60);
+    (function f(t) { const k = Math.min(1, (t - t0) / dur); el.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(f); })(t0);
+  }
+  function renderStats() {
+    const st = turnStats(turn.results), box = $("#res-stats"); box.textContent = "";
+    const chips = [];
+    if (st.best >= 2) chips.push(["🔥", `Best streak ${st.best}`]);
+    if (st.fastest !== null) chips.push(["⚡", `Fastest ${(st.fastest / 1000).toFixed(1)}s`]);
+    if (st.golden) chips.push(["🌟", `${st.golden} golden ${st.golden === 1 ? "card" : "cards"}`]);
+    chips.forEach(([e, t]) => { const c = document.createElement("span"); c.className = "stat-chip"; c.textContent = `${e} ${t}`; box.appendChild(c); });
+    box.hidden = !chips.length;
+  }
+  function renderResults(animate) {
     const ul = $("#res-list"); ul.textContent = "";
-    const got = turn.results.filter(r => r.got).length;
-    $("#res-score").textContent = String(got);
-    $("#res-unit").textContent = got === 1 ? "correct" : "correct";
+    const pts = turnPoints(turn.results);
+    if (animate) countUp($("#res-score"), pts); else $("#res-score").textContent = String(pts);
+    $("#res-unit").textContent = pts === 1 ? "point" : "points";
+    renderStats();
     $("#res-empty").hidden = turn.results.length > 0;
     turn.results.forEach((r, i) => {
       const li = document.createElement("li");
@@ -776,7 +864,9 @@
       b.setAttribute("aria-label", `${r.word}, ${r.got ? "got it" : "passed"}. Tap to change.`);
       const mk = document.createElement("span"); mk.className = "ri-mark"; mk.innerHTML = r.got ? MARK_GOOD : MARK_BAD;
       const wd = document.createElement("span"); wd.className = "ri-word"; wd.textContent = r.word;
-      const stt = document.createElement("span"); stt.className = "ri-state"; stt.textContent = r.got ? "Got it" : "Passed";
+      const stt = document.createElement("span"); stt.className = "ri-state"; stt.textContent = r.got ? (r.golden ? "Got it ×2" : "Got it") : "Passed";
+      if (r.golden) b.classList.add("is-golden");
+      if (animate) { li.classList.add("li-in"); li.style.setProperty("--i", String(Math.min(i, 14))); }
       b.append(mk, wd, stt);
       b.addEventListener("click", () => { Audio.play("tap"); turn.results[i].got = !turn.results[i].got; renderResults(); });
       li.appendChild(b); ul.appendChild(li);
@@ -784,18 +874,20 @@
   }
   $("#res-next").addEventListener("click", () => {
     Audio.play("tap");
-    const got = turn.results.filter(r => r.got).length;
+    const got = turnPoints(turn.results);
     addStars(got);
     if (got > 0) toast(`+${got} ⭐ ${got === 1 ? "star" : "stars"}. ${nextUnlockHint()}`.trim());
     if (game.mode === "quick") {
-      modal(`You got ${got}!`, "Play another quick round?", [
+      modal(`You scored ${got}!`, "Play another quick round?", [
         { label: "Play again", kind: "btn-primary", fn: () => { game.turn = 0; showReady(); } },
         { label: "Change categories", kind: "btn-ghost", fn: () => { history.length = 0; history.push("home"); show("cats", { push: false }); } },
         { label: "Back to home", kind: "btn-ghost", fn: () => { history.length = 0; show("home", { push: false }); } }
       ]);
       return;
     }
-    const p = currentPlayer(); p.score += got; p.turns++;
+    const p = currentPlayer(), st = turnStats(turn.results); p.score += got; p.turns++;
+    p.best = Math.max(p.best || 0, st.best); p.golden = (p.golden || 0) + st.golden; p.seen = (p.seen || 0) + st.seen;
+    if (st.fastest !== null) p.fastest = p.fastest ? Math.min(p.fastest, st.fastest) : st.fastest;
     game.turn++;
     if (game.turn >= game.totalTurns) showWinner(); else showBoard();
   });
@@ -838,8 +930,9 @@
     const sorted = game.roster.slice().sort((a, b) => b.score - a.score);
     const top = sorted[0].score; const winners = sorted.filter(p => p.score === top);
     $("#win-title").textContent = winners.length > 1 ? "It's a tie!" : winners[0].name;
-    $("#win-score").textContent = winners.length > 1 ? winners.map(w => w.name).join(" and ") + ` with ${top} each` : `${top} correct`;
+    $("#win-score").textContent = winners.length > 1 ? winners.map(w => w.name).join(" and ") + ` with ${top} each` : `${top} ${top === 1 ? "point" : "points"}`;
     rankList($("#win-list"));
+    renderAwards();
     endPlaySession();
     show("win", { push: false });
     Audio.stopMusic(); Audio.play("win"); buzz([60, 60, 60, 60, 200]);
@@ -848,6 +941,32 @@
   }
   $("#win-again").addEventListener("click", () => { Audio.play("tap"); startGame(); });
   $("#win-home").addEventListener("click", () => { Audio.play("tap"); history.length = 0; show("home", { push: false }); });
+
+  /* Fun awards at the end of a game (only with 2 or more players or teams) */
+  function renderAwards() {
+    const box = $("#win-awards"); box.textContent = "";
+    const r = game.roster; if (r.length < 2) { box.hidden = true; return; }
+    const pick = (fn, better) => { let best = null; r.forEach(p => { const v = fn(p); if (v == null || v === 0) return; if (!best || better(v, fn(best))) best = p; }); return best; };
+    const awards = [];
+    const fast = pick(p => p.fastest || null, (a, b) => a < b);
+    if (fast) awards.push(["⚡", "Lightning Brain", fast.name, `Fastest guess: ${(fast.fastest / 1000).toFixed(1)}s`]);
+    const hot = pick(p => p.best || 0, (a, b) => a > b);
+    if (hot && hot.best >= 2) awards.push(["🔥", "On Fire", hot.name, `${hot.best} in a row`]);
+    const gold = pick(p => p.golden || 0, (a, b) => a > b);
+    if (gold) awards.push(["🌟", "Golden Touch", gold.name, `${gold.golden} golden ${gold.golden === 1 ? "card" : "cards"}`]);
+    const brave = pick(p => p.seen || 0, (a, b) => a > b);
+    if (brave) awards.push(["🧭", "Word Explorer", brave.name, `Saw ${brave.seen} words`]);
+    awards.forEach(([e, t, n, d], i) => {
+      const c = document.createElement("div"); c.className = "award"; c.style.setProperty("--i", String(i));
+      const em = document.createElement("span"); em.className = "aw-emoji"; em.textContent = e;
+      const tx = document.createElement("span"); tx.className = "aw-text";
+      const tt = document.createElement("strong"); tt.textContent = t;
+      const nm = document.createElement("span"); nm.className = "aw-name"; nm.textContent = n;
+      const dd = document.createElement("small"); dd.textContent = d;
+      tx.append(tt, nm, dd); c.append(em, tx); box.appendChild(c);
+    });
+    box.hidden = !awards.length;
+  }
 
   function confetti() {
     if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;

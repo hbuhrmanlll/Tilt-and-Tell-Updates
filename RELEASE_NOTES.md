@@ -1,5 +1,15 @@
 # Tilt & Tell release notes
 
+## 1.3.0
+- Golden cards: now and then a gold card shows up worth double points (can be turned off in Settings).
+- Hot streaks: get 3 in a row and a flame counter appears; each answer in a streak sounds a little higher.
+- Final 10 seconds: the screen pulses and the timer beats so everyone feels the rush.
+- End-of-game awards: Lightning Brain, On Fire, Golden Touch, and Word Explorer.
+- Turn results show your best streak and fastest guess, with an animated score.
+- Smarter voice: understands joined or split words (Hulkbuster / Hulk buster), plurals, and near-misses on longer words. On Android 13+ the app also tells the phone which word to listen for.
+- Bigger Got it button, new card animations, and a big category picture behind each word.
+- New setting to flip swipe directions.
+
 ## 1.2.0
 - Android app (APK) you can install straight from the public Updates page.
 - Check for updates in Settings. The app also checks when it opens and offers a one-tap Update.
