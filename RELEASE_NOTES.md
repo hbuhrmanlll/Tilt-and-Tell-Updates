@@ -1,5 +1,10 @@
 # Tilt & Tell release notes
 
+## 1.5.0
+- Real game music during turns: a funky, upbeat track while you guess, then a fast, intense "beat the clock" track crossfades in for the last 10 seconds. At 3 seconds it speeds up a little more.
+- Both tracks are original music made for Tilt & Tell. If they can't load, the old built-in music plays instead.
+- Music is still quieter when voice control is on, and you can turn it off in Settings under Music during turns.
+
 ## 1.4.3
 - The last 10 seconds now sound clearly different: a whoosh, a much faster tempo, a fast alarm-style riff instead of the tune, a key jump, and louder music. At 3 seconds it kicks up again.
 - Hand waves are a little less sensitive: the hand has to move farther and more clearly up-down or side-to-side.

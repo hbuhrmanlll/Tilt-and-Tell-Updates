@@ -1,8 +1,8 @@
 {
-  "version": "1.4.3",
-  "notes": "Louder turn music with a big change at 10 seconds left: a whoosh, a faster alarm-style riff, a key jump, and more volume, then even more at 3 seconds. Hand waves are a little less sensitive.",
+  "version": "1.5.0",
+  "notes": "Real game music! A new funky track plays while you guess, and a fast, intense track takes over for the last 10 seconds, speeding up again at 3 seconds.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.4.3/TiltAndTell-1.4.3.apk",
-    "sha256": "4935a597f190a558d52dda0a083959c7c6f2d89c4cf4307c3a25bd888951fb63"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.5.0/TiltAndTell-1.5.0.apk",
+    "sha256": "acc665e85eaa57fe4cbeedf45d80f4ccf7874fa4f1c1f362741d513e9c153ba8"
   }
 }

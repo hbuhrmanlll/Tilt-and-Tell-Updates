@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.4.3";
+  const VERSION = "1.5.0";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -112,6 +112,9 @@
   /* ---------------- Audio (all made in code) ---------------- */
   const Audio = (() => {
     let ctx = null, master = null, sfxBus = null, musicBus = null, musicTimer = null, musicOn = false, nextBeat = 0, beatIdx = 0, mode = "menu", level = 0;
+    // Recorded turn music (from Suno): "turn" plays during a turn, "rush" takes over for the last 10 seconds.
+    // If the files can't load, the built-in synth music plays instead.
+    let trackBus = null, tracksOn = false; const bufs = {}, srcs = {}, gains = {};
     function ensure() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
@@ -121,13 +124,41 @@
       master.connect(comp); comp.connect(ctx.destination);
       sfxBus = ctx.createGain(); sfxBus.connect(master);
       musicBus = ctx.createGain(); musicBus.connect(master);
-      applyVolumes(); return true;
+      trackBus = ctx.createGain(); trackBus.connect(master);
+      applyVolumes(); loadTracks(); return true;
     }
     function applyVolumes() {
       if (!ctx) return;
       master.gain.value = settings.mute ? 0 : 1;
       sfxBus.gain.value = (settings.sfxVol / 100) * 0.9;
       musicBus.gain.value = musicLevel();
+      trackBus.gain.value = trackLevel();
+    }
+    // Recorded music level: quieter when voice control is on so the phone can still hear you
+    function trackLevel() { return Math.min(1, (settings.musicVol / 100) * 1.6) * (settings.ctlVoice ? 0.55 : 1) * [1, 1.12, 1.25][level]; }
+    function loadTracks() {
+      ["turn", "rush"].forEach(n => {
+        fetch("music/" + n + ".mp3")
+          .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error("missing")))
+          .then(a => new Promise((res, rej) => { const pr = ctx.decodeAudioData(a, res, rej); if (pr && pr.catch) pr.catch(rej); }))
+          .then(b => { bufs[n] = b; })
+          .catch(() => {});
+      });
+    }
+    function startTrack(n, at, fadeIn) {
+      stopTrack(n, at, 0.03);
+      const src = ctx.createBufferSource(), g = ctx.createGain();
+      src.buffer = bufs[n]; src.loop = true;
+      if (n === "rush" && level === 2) src.playbackRate.value = 1.06;
+      g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(1, at + fadeIn);
+      src.connect(g); g.connect(trackBus); src.start(at);
+      srcs[n] = src; gains[n] = g;
+    }
+    function stopTrack(n, at, fade) {
+      const src = srcs[n], g = gains[n]; if (!src) return;
+      g.gain.cancelScheduledValues(at); g.gain.setValueAtTime(g.gain.value, at); g.gain.linearRampToValueAtTime(0.0001, at + fade);
+      try { src.stop(at + fade + 0.05); } catch (e) { /* already stopped */ }
+      srcs[n] = null;
     }
     // Turn music is a bit quieter, and quieter still when voice is on so the phone can hear you
     function musicLevel() { return (settings.musicVol / 100) * 0.32 * (mode === "turn" ? (settings.ctlVoice ? 1.3 : 2.4) * [1, 1.35, 1.6][level] : 1); }
@@ -221,6 +252,17 @@
       const want = m === "turn" ? "turn" : "menu";
       if (settings.mute || !settings.musicVol) return;
       if (!ensure()) return;
+      const now = ctx.currentTime;
+      if (want === "turn" && bufs.turn && bufs.rush) {
+        if (tracksOn) return;
+        // hand over from the synth to the recorded music
+        if (musicOn) { musicOn = false; clearInterval(musicTimer); musicBus.gain.cancelScheduledValues(now); musicBus.gain.setTargetAtTime(0.0001, now, 0.1); }
+        mode = "turn"; tracksOn = true;
+        trackBus.gain.cancelScheduledValues(now); trackBus.gain.setValueAtTime(trackLevel(), now);
+        startTrack(level > 0 ? "rush" : "turn", now + 0.02, 0.3);
+        return;
+      }
+      if (tracksOn) { tracksOn = false; stopTrack("turn", now, 0.4); stopTrack("rush", now, 0.4); }
       if (musicOn && mode === want) return;
       mode = want; if (want === "menu") level = 0;
       musicBus.gain.cancelScheduledValues(ctx.currentTime);
@@ -234,25 +276,34 @@
       const nl = Math.max(0, Math.min(2, n | 0));
       if (nl === level) return;
       const up = nl > level; level = nl;
-      if (!musicOn || mode !== "turn" || !ctx) return;
+      if (!ctx || mode !== "turn" || !(musicOn || tracksOn)) return;
       // Louder in the rush, plus a "whoosh" riser so everyone hears the change
-      const now = ctx.currentTime;
-      musicBus.gain.cancelScheduledValues(now);
-      musicBus.gain.setTargetAtTime(musicLevel(), now, 0.08);
+      const now = ctx.currentTime, bus = tracksOn ? trackBus : musicBus;
+      if (tracksOn) {
+        trackBus.gain.cancelScheduledValues(now); trackBus.gain.setTargetAtTime(trackLevel(), now, 0.08);
+        if (level >= 1 && !srcs.rush) { stopTrack("turn", now, 0.35); startTrack("rush", now, 0.12); }
+        else if (level === 0 && !srcs.turn) { stopTrack("rush", now, 0.3); startTrack("turn", now, 0.3); }
+        // last 3 seconds: the rush track speeds up a little
+        if (srcs.rush) srcs.rush.playbackRate.setTargetAtTime(level === 2 ? 1.06 : 1, now, 0.05);
+      } else {
+        musicBus.gain.cancelScheduledValues(now);
+        musicBus.gain.setTargetAtTime(musicLevel(), now, 0.08);
+      }
       if (up) {
-        tone(220 * level, now, 0.7, { type: "sawtooth", vol: 0.12, slideTo: 1760, bus: musicBus, filter: 2600 });
+        tone(220 * level, now, 0.7, { type: "sawtooth", vol: 0.12, slideTo: 1760, bus, filter: 2600 });
         const len = Math.floor(ctx.sampleRate * 0.7), b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
         for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (i / len);
         const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
         f.type = "bandpass"; f.frequency.setValueAtTime(600, now); f.frequency.exponentialRampToValueAtTime(7000, now + 0.7);
-        g.gain.value = 0.25; src.buffer = b; src.connect(f); f.connect(g); g.connect(musicBus); src.start(now);
+        g.gain.value = 0.25; src.buffer = b; src.connect(f); f.connect(g); g.connect(bus); src.start(now);
       }
     }
     function stopMusic() {
+      if (tracksOn && ctx) { tracksOn = false; stopTrack("turn", ctx.currentTime, 0.3); stopTrack("rush", ctx.currentTime, 0.3); }
       if (!musicOn) return; musicOn = false; clearInterval(musicTimer);
       if (ctx) { musicBus.gain.cancelScheduledValues(ctx.currentTime); musicBus.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15); }
     }
-    return { ensure, play, startMusic, stopMusic, setLevel, applyVolumes, get musicOn() { return musicOn; } };
+    return { ensure, play, startMusic, stopMusic, setLevel, applyVolumes, get musicOn() { return musicOn || tracksOn; }, get tracksReady() { return !!(bufs.turn && bufs.rush); }, get tracksOn() { return tracksOn; } };
   })();
 
   function buzz(pattern) {
