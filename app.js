@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.5.0";
+  const VERSION = "1.5.1";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -114,7 +114,13 @@
     let ctx = null, master = null, sfxBus = null, musicBus = null, musicTimer = null, musicOn = false, nextBeat = 0, beatIdx = 0, mode = "menu", level = 0;
     // Recorded turn music (from Suno): "turn" plays during a turn, "rush" takes over for the last 10 seconds.
     // If the files can't load, the built-in synth music plays instead.
-    let trackBus = null, tracksOn = false; const bufs = {}, srcs = {}, gains = {};
+    let trackBus = null, tracksOn = false, trackStatus = "loading"; const bufs = {}, srcs = {}, gains = {};
+    // Start downloading the music right away, so it's ready before the first turn
+    const raw = {};
+    function getRaw(n) {
+      return fetch("music/" + n + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error("HTTP " + r.status)));
+    }
+    ["turn", "rush"].forEach(n => { raw[n] = getRaw(n); raw[n].catch(() => {}); });
     function ensure() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
@@ -135,15 +141,18 @@
       trackBus.gain.value = trackLevel();
     }
     // Recorded music level: quieter when voice control is on so the phone can still hear you
-    function trackLevel() { return Math.min(1, (settings.musicVol / 100) * 1.6) * (settings.ctlVoice ? 0.55 : 1) * [1, 1.12, 1.25][level]; }
+    // Menus play the same track softly in the background
+    function trackLevel() {
+      const base = Math.min(1, (settings.musicVol / 100) * 1.6);
+      return mode === "menu" ? base * 0.45 : base * (settings.ctlVoice ? 0.55 : 1) * [1, 1.12, 1.25][level];
+    }
+    function decode(a) { return new Promise((res, rej) => { const pr = ctx.decodeAudioData(a, res, rej); if (pr && pr.catch) pr.catch(rej); }); }
     function loadTracks() {
-      ["turn", "rush"].forEach(n => {
-        fetch("music/" + n + ".mp3")
-          .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error("missing")))
-          .then(a => new Promise((res, rej) => { const pr = ctx.decodeAudioData(a, res, rej); if (pr && pr.catch) pr.catch(rej); }))
-          .then(b => { bufs[n] = b; })
-          .catch(() => {});
-      });
+      Promise.all(["turn", "rush"].map(n =>
+        raw[n].catch(() => getRaw(n)) // one retry if the first download failed
+          .then(decode)
+          .then(b => { bufs[n] = b; if (musicOn) startMusic(mode); /* swap the backup beat for the real music */ })
+      )).then(() => { trackStatus = "ready"; }, e => { trackStatus = "failed: " + ((e && (e.message || e.name)) || "unknown"); });
     }
     function startTrack(n, at, fadeIn) {
       stopTrack(n, at, 0.03);
@@ -253,13 +262,14 @@
       if (settings.mute || !settings.musicVol) return;
       if (!ensure()) return;
       const now = ctx.currentTime;
-      if (want === "turn" && bufs.turn && bufs.rush) {
-        if (tracksOn) return;
-        // hand over from the synth to the recorded music
+      if (want === "turn" ? (bufs.turn && bufs.rush) : bufs.turn) {
+        if (tracksOn && mode === want) return;
+        // hand over from the backup synth beat to the recorded music
         if (musicOn) { musicOn = false; clearInterval(musicTimer); musicBus.gain.cancelScheduledValues(now); musicBus.gain.setTargetAtTime(0.0001, now, 0.1); }
-        mode = "turn"; tracksOn = true;
+        stopTrack("turn", now, 0.25); stopTrack("rush", now, 0.25);
+        mode = want; if (want === "menu") level = 0; tracksOn = true;
         trackBus.gain.cancelScheduledValues(now); trackBus.gain.setValueAtTime(trackLevel(), now);
-        startTrack(level > 0 ? "rush" : "turn", now + 0.02, 0.3);
+        startTrack(want === "turn" && level > 0 ? "rush" : "turn", now + 0.02, want === "turn" ? 0.3 : 1.2);
         return;
       }
       if (tracksOn) { tracksOn = false; stopTrack("turn", now, 0.4); stopTrack("rush", now, 0.4); }
@@ -303,7 +313,7 @@
       if (!musicOn) return; musicOn = false; clearInterval(musicTimer);
       if (ctx) { musicBus.gain.cancelScheduledValues(ctx.currentTime); musicBus.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15); }
     }
-    return { ensure, play, startMusic, stopMusic, setLevel, applyVolumes, get musicOn() { return musicOn || tracksOn; }, get tracksReady() { return !!(bufs.turn && bufs.rush); }, get tracksOn() { return tracksOn; } };
+    return { ensure, play, startMusic, stopMusic, setLevel, applyVolumes, get musicOn() { return musicOn || tracksOn; }, get tracksReady() { return !!(bufs.turn && bufs.rush); }, get tracksOn() { return tracksOn; }, get trackStatus() { return trackStatus; } };
   })();
 
   function buzz(pattern) {
@@ -1248,6 +1258,8 @@
     const vs = $("#voice-support");
     if (!Voice.supported) { vs.textContent = "This browser doesn't support voice. Try Chrome on Android or Safari on iPhone."; $('[data-set="ctlVoice"]').disabled = true; }
     $('[data-set="voiceAnswer"]').disabled = !settings.ctlVoice;
+    const ms = Audio.trackStatus;
+    $("#music-status").textContent = ms === "ready" ? "Game music is loaded ✓" : ms === "loading" ? "Game music is loading..." : "Game music couldn't load (" + ms.slice(8) + "), so the backup beat plays.";
     if (!Wave.supported) { $("#wave-support").textContent = "This device can't use the camera for hand waves."; $('[data-set="ctlWave"]').disabled = true; }
   }
   onShow.settings = renderSettings;

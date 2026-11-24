@@ -1,5 +1,10 @@
 # Tilt & Tell release notes
 
+## 1.5.1
+- The "Game On" music now plays softly on the menus too, so you hear it right away.
+- The music starts downloading as soon as the app opens. If a turn starts before it's ready, the backup beat plays and then switches to the real music once it loads.
+- Settings (under Music during turns) now says whether the game music loaded, and if not, why.
+
 ## 1.5.0
 - Real game music during turns: a funky, upbeat track while you guess, then a fast, intense "beat the clock" track crossfades in for the last 10 seconds. At 3 seconds it speeds up a little more.
 - Both tracks are original music made for Tilt & Tell. If they can't load, the old built-in music plays instead.

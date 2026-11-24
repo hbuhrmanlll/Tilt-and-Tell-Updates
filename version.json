@@ -1,8 +1,8 @@
 {
-  "version": "1.5.0",
-  "notes": "Real game music! A new funky track plays while you guess, and a fast, intense track takes over for the last 10 seconds, speeding up again at 3 seconds.",
+  "version": "1.5.1",
+  "notes": "The new game music now plays on the menus too (softly), loads as soon as the app opens, and switches in mid-turn if it was still loading. Settings shows whether the game music loaded.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.5.0/TiltAndTell-1.5.0.apk",
-    "sha256": "acc665e85eaa57fe4cbeedf45d80f4ccf7874fa4f1c1f362741d513e9c153ba8"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.5.1/TiltAndTell-1.5.1.apk",
+    "sha256": "80d18a06dab8505c84cc04490b179943bcbef535b0448db73eb286c309354527"
   }
 }
