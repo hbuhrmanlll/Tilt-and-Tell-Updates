@@ -1,5 +1,8 @@
 # Tilt & Tell release notes
 
+## 1.5.2
+- The Third Heaven Studios logo now shows on the start-up screen and on the About screen.
+
 ## 1.5.1
 - The "Game On" music now plays softly on the menus too, so you hear it right away.
 - The music starts downloading as soon as the app opens. If a turn starts before it's ready, the backup beat plays and then switches to the real music once it loads.

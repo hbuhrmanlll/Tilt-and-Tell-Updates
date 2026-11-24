@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.5.1";
+  const VERSION = "1.5.2";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";

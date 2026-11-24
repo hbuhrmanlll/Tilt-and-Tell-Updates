@@ -1,8 +1,8 @@
 {
-  "version": "1.5.1",
-  "notes": "The new game music now plays on the menus too (softly), loads as soon as the app opens, and switches in mid-turn if it was still loading. Settings shows whether the game music loaded.",
+  "version": "1.5.2",
+  "notes": "The real Third Heaven Studios logo now shows on the start-up screen and in About.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.5.1/TiltAndTell-1.5.1.apk",
-    "sha256": "80d18a06dab8505c84cc04490b179943bcbef535b0448db73eb286c309354527"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.5.2/TiltAndTell-1.5.2.apk",
+    "sha256": "3e6354d0f09a02de7efabeb001fcd8d80a3df18155d6a8f6373a557acf85217f"
   }
 }
