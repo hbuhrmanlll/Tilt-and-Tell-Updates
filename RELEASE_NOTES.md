@@ -1,5 +1,11 @@
 # Tilt & Tell release notes
 
+## 1.7.0
+- Settings explained: every setting has a small "i" button. Tap it to open a plain explanation right under the setting, and tap again to close it.
+- Twist cards (off unless you turn them on in Settings): about one card in eight changes how friends give clues, like "Act it out. No talking!" or "Sing your clues!" Guessing a twist card is worth 2 points.
+- Final round: when you play more than one round, the last time around the table every card counts double. A badge on the "Your turn" screen and a ×2 tag during the turn show it.
+- The "Your turn" screen fits better on small phones and when the phone is held sideways.
+
 ## 1.6.0
 - Winner screen: a gold trophy drops in, the winner's name is gold, the awards are smaller cards so the final scores fit, and the scores slide in one by one.
 - "Your turn" screen: a new drawing of a player with the phone on their forehead while friends give clues.

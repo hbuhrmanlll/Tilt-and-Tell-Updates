@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.6.0";
+  const VERSION = "1.7.0";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -24,7 +24,7 @@
   /* ---------------- Settings ---------------- */
   const DEFAULTS = {
     ctlTilt: true, ctlSwipe: true, ctlButtons: true, ctlVoice: false, voiceAnswer: true,
-    tiltFlip: false, swipeSwap: false, ctlWave: false, turnMusic: true, golden: true, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
+    tiltFlip: false, swipeSwap: false, ctlWave: false, turnMusic: true, golden: true, twists: false, sens: "med", oneWord: true, mute: false, sfxVol: 80, musicVol: 35, haptics: true
   };
   const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
   const saveSettings = () => store.set("settings", settings);
@@ -197,6 +197,7 @@
         const t = ctx.currentTime, k = Math.pow(2, Math.min(streak || 0, 8) / 24);
         tone(784 * k, t, 0.12, { type: "triangle", vol: 0.32 }); tone(1175 * k, t + 0.08, 0.22, { type: "triangle", vol: 0.32 }); tone(1568 * k, t + 0.16, 0.28, { type: "sine", vol: 0.18 });
       },
+      twist() { const t = ctx.currentTime; tone(330, t, 0.18, { type: "square", vol: 0.08, slideTo: 990, filter: 3000 }); tone(990, t + 0.16, 0.22, { type: "square", vol: 0.07, slideTo: 495, filter: 3000 }); },
       golden() { const t = ctx.currentTime; [1047, 1319, 1568, 2093, 2637].forEach((f, i) => tone(f, t + i * 0.05, 0.3, { type: "sine", vol: 0.16 })); noise(t + 0.1, 0.25, 0.05, 6000); },
       streak() { const t = ctx.currentTime; tone(523, t, 0.1, { type: "square", vol: 0.1, filter: 2400 }); tone(784, t + 0.07, 0.1, { type: "square", vol: 0.1, filter: 2400 }); tone(1047, t + 0.14, 0.22, { type: "square", vol: 0.12, filter: 2400 }); },
 
@@ -609,6 +610,7 @@
     let tip = tips[0];
     if (settings.ctlWave && Wave.supported) tip += ` Wave a hand across the camera: ${settings.swipeSwap ? "side to side for Got it, up or down to Pass" : "up or down for Got it, side to side to Pass"}.`;
     $("#ready-tip").textContent = tip;
+    $("#ready-final").hidden = !isFinalRound();
     show("ready", { push: false });
   }
   $("#ready-quit").addEventListener("click", confirmQuit);
@@ -620,6 +622,12 @@
       { label: "Keep playing", kind: "btn-primary" }
     ]);
   }
+
+  /* Final round: the last time around the table, every card counts double (only when there's more than one round) */
+  function isFinalRound() { return game.mode !== "quick" && game.rounds > 1 && game.turn >= game.roster.length * (game.rounds - 1); }
+  /* Twist cards: [icon, rule shown to the clue-givers] */
+  const TWISTS = [["🎭", "Act it out. No talking!"], ["🔊", "Sound effects only!"], ["☝️", "One-word clues only!"], ["🎵", "Sing your clues!"], ["✍️", "Draw it in the air!"], ["🗿", "Freeze poses only!"], ["🤫", "Whisper your clues!"]];
+
 
   /* ---------------- Turn ---------------- */
   const turn = { deck: [], idx: 0, results: [], left: 0, running: false, paused: false, lock: false, timer: null, endAt: 0, wordShownAt: 0, waitTimer: null, streak: 0, lastOutcome: "" };
@@ -658,8 +666,11 @@
   function beginTurn() {
     turn.deck = buildDeck(Array.from(game.cats));
     turn.idx = 0; turn.results = []; turn.left = game.time; turn.running = false; turn.paused = false; turn.lock = true; turn.streak = 0; turn.lastOutcome = "";
-    turn.deck.forEach(d => { d.golden = false; });
-    $("#hud-streak").hidden = true; $("#play-stage").classList.remove("is-hurry", "is-golden");
+    turn.deck.forEach(d => { d.golden = false; d.twist = null; });
+    turn.final = isFinalRound();
+    $("#hud-final").hidden = !turn.final;
+    $("#hud-streak").hidden = true; $("#play-stage").classList.remove("is-hurry", "is-golden", "is-twist");
+    $("#play-twist").hidden = true;
     const p = currentPlayer();
     $("#screen-play").style.setProperty("--ph", 265);
     $("#play-stage").style.setProperty("--ph", 265);
@@ -730,14 +741,19 @@
     $("#play-cat").textContent = (game.mode === "quick" ? "" : currentPlayer().name + " · ") + item.cat.name;
     // About one card in seven is a golden card worth double (never the first card)
     item.golden = !!(settings.golden && turn.idx > 0 && randInt(7) === 0);
+    // About one card in eight (that isn't golden) is a twist card: friends must give clues a special way
+    item.twist = (!item.golden && settings.twists && turn.idx > 1 && randInt(8) === 0) ? TWISTS[randInt(TWISTS.length)] : null;
     $("#play-stage").classList.toggle("is-golden", item.golden);
+    $("#play-stage").classList.toggle("is-twist", !!item.twist);
     $("#play-golden").hidden = !item.golden;
+    const tw = $("#play-twist"); tw.hidden = !item.twist; tw.textContent = item.twist ? item.twist[0] + " " + item.twist[1] : "";
     $("#play-emoji").textContent = item.cat.emoji || "";
     $("#play-stage").scrollTop = 0;
     const w = $("#play-word"); w.textContent = item.word;
     w.classList.remove("pop", "pop-up", "pop-side"); void w.offsetWidth;
     w.classList.add(turn.lastOutcome === "got" ? "pop-up" : turn.lastOutcome === "pass" ? "pop-side" : "pop");
     if (item.golden) Audio.play("golden");
+    if (item.twist) Audio.play("twist");
     if (APP && APP.setSpeechHint) { try { APP.setSpeechHint(item.word); } catch (e) {} }
     fitWord();
     turn.wordShownAt = performance.now();
@@ -758,7 +774,8 @@
   }
 
   /* Points: golden cards count double */
-  const pointsOf = r => r.got ? (r.golden ? 2 : 1) : 0;
+  // Golden and twist cards are worth 2; everything counts double in the final round
+  const pointsOf = r => r.got ? (r.golden || r.twist ? 2 : 1) * (r.final ? 2 : 1) : 0;
   const turnPoints = list => list.reduce((n, r) => n + pointsOf(r), 0);
   /* Little burst of sparks behind "Got it!" */
   function burst(gold) {
@@ -785,18 +802,18 @@
     if (source !== "button" && source !== "key" && performance.now() - turn.wordShownAt < 250) return; // ignore accidental double triggers
     turn.lock = true;
     const item = turn.deck[turn.idx], isGot = outcome === "got";
-    turn.results.push({ word: item.word, cat: item.cat, got: isGot, golden: !!item.golden, ms: Math.round(performance.now() - turn.wordShownAt) });
+    turn.results.push({ word: item.word, cat: item.cat, got: isGot, golden: !!item.golden, twist: item.twist ? item.twist[1] : "", final: !!turn.final, ms: Math.round(performance.now() - turn.wordShownAt) });
     markSeen(item.cat, item.word);
     turn.streak = isGot ? turn.streak + 1 : 0; turn.lastOutcome = outcome;
     $("#play-score").textContent = String(turnPoints(turn.results));
     const chip = $("#hud-streak"); chip.hidden = turn.streak < 3; chip.textContent = `🔥 ${turn.streak}`;
     const ov = $("#play-overlay");
-    ov.className = "play-overlay show " + (isGot ? (item.golden ? "good gold" : "good") : "bad");
-    $("#po-big").textContent = isGot ? (item.golden ? "Double!" : "Got it!") : "Pass";
+    ov.className = "play-overlay show " + (isGot ? (item.golden || item.twist ? "good gold" : "good") : "bad");
+    $("#po-big").textContent = isGot ? (item.golden ? "Double!" : item.twist ? "Twist bonus!" : "Got it!") : "Pass";
     let small = item.word + (source === "voice-answer" ? " (heard it)" : "");
     if (isGot && turn.streak >= 3) small += ` · 🔥 ${turn.streak} in a row`;
     $("#po-small").textContent = small;
-    if (isGot) burst(item.golden);
+    if (isGot) burst(item.golden || !!item.twist);
     Audio.play(isGot ? "correct" : "pass", turn.streak);
     if (isGot && turn.streak > 0 && turn.streak % 5 === 0) Audio.play("streak");
     buzz(isGot ? (item.golden ? [30, 40, 30] : 35) : 70);
@@ -1011,6 +1028,7 @@
     return { start, stop, get supported() { return supported; }, get on() { return !!stream; } };
   })();
 
+
   /* ---------------- Voice ---------------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const NATIVE_SR = !!(APP && (() => { try { return APP.speechAvailable(); } catch (e) { return false; } })());
@@ -1120,6 +1138,9 @@
     const chips = [];
     if (st.best >= 2) chips.push(["🔥", `Best streak ${st.best}`]);
     if (st.fastest !== null) chips.push(["⚡", `Fastest ${(st.fastest / 1000).toFixed(1)}s`]);
+    if (turn.final) chips.push(["🔥", "Final round ×2"]);
+    const twists = turn.results.filter(r => r.got && r.twist).length;
+    if (twists) chips.push(["🎭", `${twists} twist ${twists === 1 ? "bonus" : "bonuses"}`]);
     if (st.golden) chips.push(["🌟", `${st.golden} golden ${st.golden === 1 ? "card" : "cards"}`]);
     chips.forEach(([e, t]) => { const c = document.createElement("span"); c.className = "stat-chip"; c.textContent = `${e} ${t}`; box.appendChild(c); });
     box.hidden = !chips.length;
@@ -1137,8 +1158,10 @@
       b.setAttribute("aria-label", `${r.word}, ${r.got ? "got it" : "passed"}. Tap to change.`);
       const mk = document.createElement("span"); mk.className = "ri-mark"; mk.innerHTML = r.got ? MARK_GOOD : MARK_BAD;
       const wd = document.createElement("span"); wd.className = "ri-word"; wd.textContent = r.word;
-      const stt = document.createElement("span"); stt.className = "ri-state"; stt.textContent = r.got ? (r.golden ? "Got it ×2" : "Got it") : "Passed";
-      if (r.golden) b.classList.add("is-golden");
+      const stt = document.createElement("span"); stt.className = "ri-state"; const pts = pointsOf(r);
+      stt.textContent = r.got ? (pts > 1 ? `Got it ×${pts}` : "Got it") : "Passed";
+      if (r.twist) { const tws = document.createElement("small"); tws.className = "ri-twist"; tws.textContent = r.twist; wd.appendChild(tws); }
+      if (r.golden || r.twist) b.classList.add("is-golden");
       if (animate) { li.classList.add("li-in"); li.style.setProperty("--i", String(Math.min(i, 14))); }
       b.append(mk, wd, stt);
       b.addEventListener("click", () => { Audio.play("tap"); turn.results[i].got = !turn.results[i].got; renderResults(); });
@@ -1274,6 +1297,49 @@
     if (!Wave.supported) { $("#wave-support").textContent = "This device can't use the camera for hand waves."; $('[data-set="ctlWave"]').disabled = true; }
   }
   onShow.settings = renderSettings;
+
+  /* Settings help: an "i" button on each setting opens a plain-language explanation under it */
+  const SETTING_HELP = {
+    ctlTilt: ["Hold the phone sideways on your forehead with the screen facing out.", "Tip the screen down toward the floor when you get it right. Tip it up toward the ceiling to pass.", "Bring the phone back to level before the next card.", "If cards score by accident, try \"Big tilt\" under Tilt sensitivity."],
+    ctlSwipe: ["Swipe your finger across the screen to score.", "Up or down counts it as Got it. Left or right passes.", "Handy when the phone is in your hand or tilting is hard. It works at the same time as tilt."],
+    ctlWave: ["A friend waves a hand in front of the front camera (the one on the screen side, facing your friends).", "Up or down counts it as Got it. Side to side passes.", "The camera only watches for a moving hand. Nothing is recorded, saved, or sent anywhere.", "The phone asks for camera permission the first time. It may use a little more battery."],
+    swipeSwap: ["Switches the directions for swipes and hand waves.", "With this on, side to side is Got it and up or down is Pass.", "Turn it on if that feels more natural to your group."],
+    ctlButtons: ["Shows big Pass and Got it buttons on the turn screen.", "Good for a phone lying on a table, a tablet, or anyone who can't tilt.", "If you turn off every other control, these stay on so you can still play."],
+    ctlVoice: ["The guesser says \"got it\" or \"pass\" out loud and the game hears it.", "Uses your phone's built-in speech service, so it needs microphone permission.", "Works best in a quieter room. Music plays quieter while it's on so the mic can hear you."],
+    voiceAnswer: ["Only works when Voice is on.", "When the guesser says the word on the card out loud, the game scores it for you. No tilt needed.", "A loud room can make it miss words, so keep another control on too."],
+    tiltFlip: ["Switches the tilt directions.", "With this on, tip the screen up for Got it and down to pass."],
+    sens: ["How far you have to tip the phone before it counts.", "Big tilt: you have to tip a lot. Fewer accidents.", "Normal: works for most people.", "Small tilt: a small nod is enough. Good for younger kids, but easier to set off by mistake."],
+    mute: ["Turns off all music and sound effects at once.", "Your volume settings are kept for when you turn sound back on."],
+    sfxVol: ["How loud the game sounds are: the countdown, the Got it ding, the Pass buzz, and Time's up.", "Slide all the way left to turn just the sound effects off."],
+    musicVol: ["How loud the music is on the menus and during turns.", "Slide all the way left to turn the music off and keep the sound effects."],
+    turnMusic: ["Plays the \"Game On\" song while you guess.", "For the last 10 seconds it switches to the faster \"Beat the Clock\" song, and it speeds up again at 3 seconds.", "Turn this off for quiet turns. Menu music still follows the Music slider."],
+    haptics: ["The phone buzzes on Got it, Pass, and Time's up, so the guesser can feel it.", "Only works on phones that support vibration."],
+    golden: ["Now and then a card turns gold (about 1 card in 7).", "Guessing a gold card is worth 2 points instead of 1.", "It adds surprise without changing how you play."],
+    twists: ["About 1 card in 8 comes with a rule for the friends giving clues, like \"Act it out. No talking!\", \"Sound effects only!\", or \"Sing your clues!\"", "The rule shows at the top of the card.", "Guessing a twist card is worth 2 points instead of 1.", "Off by default. Turn it on for a sillier game."],
+    oneWord: ["On: every card is a single word, like \"Penguin\". Easier for younger kids.", "Off: you also get longer cards, like \"Statue of Liberty\"."]
+  };
+  $$("#screen-settings .row").forEach(row => {
+    const ctl = row.querySelector("[data-set]") || row.querySelector("#sens-chips");
+    if (!ctl) return;
+    const key = ctl.dataset.set || "sens", help = SETTING_HELP[key];
+    const title = row.querySelector("strong");
+    if (!help || !title) return;
+    const id = "help-" + key;
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "info-btn"; btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-controls", id);
+    btn.setAttribute("aria-label", "More about " + title.textContent); btn.textContent = "i";
+    title.appendChild(btn);
+    const panel = document.createElement("div");
+    panel.className = "row-help"; panel.id = id; panel.hidden = true;
+    const ul = document.createElement("ul");
+    help.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    panel.appendChild(ul); row.insertAdjacentElement("afterend", panel);
+    btn.addEventListener("click", e => {
+      e.preventDefault(); e.stopPropagation(); Audio.play("tap");
+      const open = panel.hidden; panel.hidden = !open; btn.setAttribute("aria-expanded", open ? "true" : "false");
+      row.classList.toggle("has-help-open", open);
+    });
+  });
   $$("[data-set]").forEach(el => {
     el.addEventListener(el.type === "range" ? "input" : "change", () => {
       const k = el.dataset.set;

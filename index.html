@@ -179,6 +179,7 @@
           <path d="M103 46.5c0-4.6 3.2-7.5 7.4-7.5 4.4 0 7.3 2.8 7.3 6.6 0 5.6-7.1 5.9-7.1 11.2" fill="none" stroke="#1a1640" stroke-width="4.2" stroke-linecap="round"/><circle cx="110.6" cy="63" r="2.6" fill="#1a1640"/>
         </g>
       </svg>
+      <p class="ready-final" id="ready-final" hidden>🔥 Final round: every card counts double!</p>
       <p class="ready-tip" id="ready-tip">Hold the phone sideways on your forehead, screen facing out.</p>
     </div>
     <div class="dock">
@@ -194,6 +195,7 @@
         <div class="hud-cat" id="play-cat"></div>
         <div class="hud-right">
           <span class="hud-streak" id="hud-streak" hidden aria-label="Streak"></span>
+          <span class="hud-final" id="hud-final" hidden aria-label="Final round, double points">×2</span>
           <span class="hud-wave" id="hud-wave" hidden aria-label="Hand waves are on" title="Hand waves are on">👋</span>
           <span class="hud-mic" id="hud-mic" hidden aria-label="Listening">🎤</span>
           <span class="hud-score" id="play-score" aria-label="Score">0</span>
@@ -201,7 +203,7 @@
         </div>
       </div>
       <div class="play-emoji" id="play-emoji" aria-hidden="true"></div>
-      <div class="play-word-wrap"><div class="play-golden" id="play-golden" hidden>★ Double points</div><div class="play-word" id="play-word" aria-live="polite"></div></div>
+      <div class="play-word-wrap"><div class="play-golden" id="play-golden" hidden>★ Double points</div><div class="play-twist" id="play-twist" hidden></div><div class="play-word" id="play-word" aria-live="polite"></div></div>
       <div class="play-buttons" id="play-buttons">
         <button class="pbtn pbtn-pass" id="btn-pass">Pass</button>
         <button class="pbtn pbtn-got" id="btn-got">Got it</button>
@@ -294,7 +296,7 @@
         <label class="row"><span><strong>Tilt</strong><small>Tilt down for got it, up to pass</small></span><input type="checkbox" class="switch" data-set="ctlTilt"></label>
         <label class="row"><span><strong>Swipe</strong><small>Up or down got it, left or right pass</small></span><input type="checkbox" class="switch" data-set="ctlSwipe"></label>
         <label class="row"><span><strong>Hand wave (camera)</strong><small id="wave-support">Wave over the front camera: up or down got it, side to side pass. The picture never leaves your phone.</small></span><input type="checkbox" class="switch" data-set="ctlWave"></label>
-        <label class="row"><span><strong>Flip swipe and wave directions</strong><small>Side to side got it, up or down pass</small></span><input type="checkbox" class="switch" data-set="swipeSwap"></label>
+        <label class="row"><span><strong>Flip swipe and wave</strong><small>Side to side got it, up or down pass</small></span><input type="checkbox" class="switch" data-set="swipeSwap"></label>
         <label class="row"><span><strong>On-screen buttons</strong><small>Big Pass and Got it buttons</small></span><input type="checkbox" class="switch" data-set="ctlButtons"></label>
         <label class="row"><span><strong>Voice</strong><small id="voice-support">Say “got it” or “pass”</small></span><input type="checkbox" class="switch" data-set="ctlVoice"></label>
         <label class="row"><span><strong>Say the answer to score</strong><small>Counts it when the mic hears the word</small></span><input type="checkbox" class="switch" data-set="voiceAnswer"></label>
@@ -318,8 +320,9 @@
       <h3 class="sub">Words</h3>
       <div class="list">
         <label class="row"><span><strong>Golden cards</strong><small>Now and then a gold card shows up worth double points</small></span><input type="checkbox" class="switch" data-set="golden"></label>
+        <label class="row"><span><strong>Twist cards</strong><small>Some cards change how friends give clues, like act it out or sounds only. Worth 2 points.</small></span><input type="checkbox" class="switch" data-set="twists"></label>
         <label class="row"><span><strong>One word per card</strong><small>Turn off to also get longer cards like “Statue of Liberty”</small></span><input type="checkbox" class="switch" data-set="oneWord"></label>
-        <button class="row row-btn" id="unlock-all"><span><strong>Unlock all decks</strong><small>For leaders running a big game night</small></span></button>
+        <button class="row row-btn" id="unlock-all"><span><strong>Unlock all decks</strong><small>Opens every locked deck right away, without earning stars. Good for leaders running a big game night.</small></span></button>
         <button class="row row-btn" id="reset-history"><span><strong>Reset word history</strong><small>The game avoids repeats until every word in a category has shown up. This starts it over.</small></span></button>
       </div>
       <h3 class="sub">Updates</h3>
@@ -382,7 +385,7 @@
       <img class="studio-logo small" src="icons/studio-logo.png" alt="Third Heaven Studios" width="640" height="319">
       <p class="about-made">Made by Third Heaven Studios</p>
       <p class="about-ver">Tilt &amp; Tell, version <span id="app-version"></span></p>
-      <p class="fine">Tilt &amp; Tell collects no personal information. Names, scores, and custom decks stay on this device. If you turn on voice, your phone's built-in speech service may process audio to understand commands.</p>
+      <p class="fine">Tilt &amp; Tell collects no personal information. Names, scores, and custom decks stay on this device. If you turn on voice, your phone's built-in speech service may process audio to understand commands. Hand-wave camera pictures are only used to see your hand move. They are never saved or sent anywhere.</p>
       <p class="fine">Category names describe general topics. Tilt &amp; Tell is not affiliated with or endorsed by any studio, publisher, or brand mentioned in the word lists.</p>
       <p class="fine">Font: Bricolage Grotesque, SIL Open Font License 1.1. Sound effects are made in code. The game music is original and was made for Tilt &amp; Tell.</p>
       <p class="copy">© <span id="copy-year"></span> Third Heaven Studios</p>
@@ -397,7 +400,6 @@
       <div class="modal-actions" id="modal-actions"></div>
     </div>
   </div>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="rotate-hint" id="rotate-hint" aria-hidden="true">Turn your phone sideways for bigger words</div>
 </div>

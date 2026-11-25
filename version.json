@@ -1,8 +1,8 @@
 {
-  "version": "1.6.0",
-  "notes": "A design polish pass: a trophy and award cards on the winner screen, a new illustration on the Your turn screen, a gold countdown, and pop-up messages that no longer cover buttons.",
+  "version": "1.7.0",
+  "notes": "Every setting now has an info button that explains it. Plus a final round where every card counts double, and optional twist cards you can turn on in Settings.",
   "apk": {
-    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.6.0/TiltAndTell-1.6.0.apk",
-    "sha256": "4517bcf2584efb00a0303016685e85dfdf9395129e3ca0c434999ec89634923b"
+    "url": "https://github.com/hbuhrmanlll/Tilt-and-Tell-Updates/releases/download/v1.7.0/TiltAndTell-1.7.0.apk",
+    "sha256": "dec83ea0436d001b79352d0632d52932e772795d7d41e0b771734529bbca2617"
   }
 }

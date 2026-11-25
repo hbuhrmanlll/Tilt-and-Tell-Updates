@@ -195,7 +195,7 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 /* ---------- Ready ---------- */
 .bar-clear h2 { font-size: 20px; }
 .ready-meta { flex: 1; text-align: center; color: var(--muted); font-size: 14px; font-weight: 600; }
-.ready-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
+.ready-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
 .ready-kicker { color: var(--gold); font-weight: 700; margin: 0; font-size: 17px; }
 .ready-name { margin: 0; font-weight: 800; font-stretch: 80%; font-size: clamp(48px, 15vw, 88px); line-height: .95; letter-spacing: -.03em; max-width: 100%; overflow-wrap: anywhere; }
 .ready-cats { color: var(--muted); margin: 8px 0 18px; max-width: 34ch; font-size: 15px; }
@@ -343,6 +343,8 @@ input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius
   .pbtn { min-height: 52px; font-size: 19px; }
   .screen-ready .ready-art { display: none; }
   .ready-tip { margin-top: 4px; }
+  .screen-ready .ready-name { font-size: 52px; }
+  .screen-ready .ready-final { margin: 4px 0 0; padding: 6px 14px; font-size: 15px; }
   .home-hero .hero-cards { display: none; }
   .wordmark { font-size: 76px; }
 }
@@ -581,3 +583,40 @@ input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius
   .ra-phone, .ra-bubble, .win-trophy, .board-final li, .res-title, .pw-count.tick::after { animation: none !important; }
   .ra-bubble { opacity: 1; }
 }
+
+/* ---------- 1.7: twist cards, final round ---------- */
+.ready-final { margin: 4px 0 0; padding: 8px 14px; border-radius: 999px; font-weight: 800; color: #3a1a00;
+  background: linear-gradient(90deg, #ffb347, #f5c451); box-shadow: 0 6px 20px rgba(255,160,60,.35); animation: chipIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+.hud-final { font-weight: 800; font-size: 13px; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; background: linear-gradient(90deg, #ffb347, #f5c451); color: #3a1a00; }
+.play-twist { align-self: center; margin-bottom: 6px; padding: 8px 16px; border-radius: 999px; font-weight: 800; font-size: clamp(15px, 4.4vmin, 24px);
+  background: #fff; color: var(--paper-ink); box-shadow: 0 8px 24px rgba(0,0,0,.25); animation: twistIn .5s cubic-bezier(.2,1.5,.4,1) both; }
+.play-twist[hidden] { display: none; }
+@keyframes twistIn { from { transform: scale(.3) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.08) rotate(2deg); } to { transform: none; opacity: 1; } }
+.play-stage.is-twist { background: repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 22px, transparent 22px 44px), radial-gradient(120% 90% at 50% 40%, hsl(var(--ph, 265) 60% 42%), hsl(var(--ph, 265) 62% 24%)); }
+.ri-twist { display: block; font-size: 12px; font-weight: 600; color: var(--gold); margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .ready-final, .play-twist { animation: none !important; }
+}
+
+/* 1.7: short portrait phones keep "I'm ready" on screen */
+@media (orientation: portrait) and (max-height: 700px) {
+  .screen-ready .ready-art { width: min(140px, 40vw); }
+}
+@media (orientation: portrait) and (max-height: 600px) {
+  .screen-ready .ready-art { display: none; }
+}
+.row[hidden] { display: none; }
+
+/* 1.7: settings help ("i" button + explanation under the setting) */
+.info-btn { flex: none; width: 24px; height: 24px; margin-left: 8px; vertical-align: 2px; border-radius: 50%; display: inline-grid; place-items: center; font: italic 800 14px/1 Georgia, "Times New Roman", serif;
+  color: var(--gold); background: rgba(245,196,81,.12); border: 1px solid rgba(245,196,81,.45); padding: 0; cursor: pointer; transition: background .15s, transform .12s; position: relative; }
+.info-btn::after { content: ""; position: absolute; inset: -10px; }
+.info-btn:active { transform: scale(.9); }
+.info-btn[aria-expanded="true"] { background: var(--gold); color: #1a1640; }
+.row.has-help-open { border-bottom-color: transparent; }
+.row-help { padding: 0 16px 14px; border-bottom: 1px solid var(--line); background: rgba(245,196,81,.05); animation: helpIn .22s ease-out both; }
+.row-help[hidden] { display: none; }
+.row-help ul { margin: 0; padding: 10px 0 0 18px; color: #d9dcf5; font-size: 14px; line-height: 1.45; }
+.row-help li + li { margin-top: 6px; }
+@keyframes helpIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .row-help { animation: none; } }
