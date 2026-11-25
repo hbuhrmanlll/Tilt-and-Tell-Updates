@@ -1,5 +1,5 @@
 /* Tilt & Tell offline cache. Bump VERSION on every release. */
-const VERSION = "tt-1.5.2";
+const VERSION = "tt-1.6.0";
 const FILES = ["./", "index.html", "styles.css", "app.js", "categories.js", "manifest.webmanifest",
   "fonts/bricolage-latin.woff2", "fonts/bricolage-latin-ext.woff2", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png", "icons/studio-logo.png",
   "music/turn.mp3", "music/rush.mp3"];

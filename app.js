@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "1.5.2";
+  const VERSION = "1.6.0";
   // Present only inside the Android app (see android/…/MainActivity.java)
   const APP = typeof window.TTApp !== "undefined" ? window.TTApp : null;
   const UPDATES_BASE = "https://hbuhrmanlll.github.io/Tilt-and-Tell-Updates/";
@@ -335,6 +335,7 @@
     const sc = next.querySelector(".scroll"); if (sc) sc.scrollTop = 0;
     if (MUSIC_SCREENS.has(name)) Audio.startMusic(); else Audio.stopMusic();
     if (onShow[name]) onShow[name]();
+    if ($("#toast").classList.contains("show")) requestAnimationFrame(placeToast);
   }
   function back() { const p = history.pop() || "home"; show(p, { push: false }); }
   const onShow = {};
@@ -344,7 +345,17 @@
     if (e.target.closest("[data-back]")) { Audio.play("tap"); back(); }
   });
 
-  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200); }
+  // Keep the toast just above the current screen's bottom buttons so it never covers them
+  function placeToast() {
+    const t = $("#toast"), dock = document.querySelector(".screen.is-active .dock");
+    const top = dock && dock.offsetParent ? dock.getBoundingClientRect().top : 0;
+    t.style.setProperty("--toast-b", top > 0 ? (window.innerHeight - top + 12) + "px" : "");
+  }
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; placeToast();
+    // measure again after any screen change in the same tap has laid out
+    requestAnimationFrame(() => requestAnimationFrame(placeToast));
+    t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200); }
 
   /* Modal dialog. actions: [{label, kind, fn}] */
   function modal(title, text, actions) {

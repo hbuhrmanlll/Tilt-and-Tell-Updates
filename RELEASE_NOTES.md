@@ -1,5 +1,12 @@
 # Tilt & Tell release notes
 
+## 1.6.0
+- Winner screen: a gold trophy drops in, the winner's name is gold, the awards are smaller cards so the final scores fit, and the scores slide in one by one.
+- "Your turn" screen: a new drawing of a player with the phone on their forehead while friends give clues.
+- The 3-2-1 countdown is gold, with a ring that pulses each second.
+- Pop-up messages (like stars earned) now sit just above the buttons instead of covering them.
+- The turn score is gold and pops in, and the main buttons have a little shine.
+
 ## 1.5.2
 - The Third Heaven Studios logo now shows on the start-up screen and on the About screen.
 
